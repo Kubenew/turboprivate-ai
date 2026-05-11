@@ -1,0 +1,37 @@
+{{- if .Values.inference.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-inference
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "turboprivate.labels" . | nindent 4 }}
+    component: inference
+spec:
+  replicas: {{ .Values.inference.replicas }}
+  selector:
+    matchLabels:
+      component: inference
+  template:
+    metadata:
+      labels:
+        component: inference
+    spec:
+      {{- if .Values.inference.gpu.enabled }}
+      nodeSelector:
+        nvidia.com/gpu.present: "true"
+      {{- end }}
+      containers:
+        - name: inference
+          image: {{ .Values.inference.image }}
+          ports:
+            - containerPort: 8001
+          env:
+            - name: MODEL_NAME
+              value: "{{ (index .Values.inference.models 0).name }}"
+          {{- if .Values.inference.gpu.enabled }}
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          {{- end }}
+{{- end }}

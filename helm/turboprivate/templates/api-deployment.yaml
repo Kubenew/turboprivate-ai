@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-api
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "turboprivate.labels" . | nindent 4 }}
+    component: api
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      component: api
+  template:
+    metadata:
+      labels:
+        component: api
+    spec:
+      containers:
+        - name: api
+          image: {{ .Values.api.image }}
+          ports:
+            - containerPort: {{ .Values.api.port }}
+          env:
+            - name: TURBO_INFERENCE__BACKEND
+              value: "vllm"
+            - name: TURBO_SAFETY__ENABLED
+              value: "{{ .Values.safety.enabled }}"
+            - name: TURBO_AUTH__JWT_SECRET
+              value: "{{ .Values.auth.jwt_secret }}"
+          resources:
+            {{- toYaml .Values.api.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-api
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    component: api
+  ports:
+    - port: {{ .Values.api.port }}
+      targetPort: {{ .Values.api.port }}
+      name: http

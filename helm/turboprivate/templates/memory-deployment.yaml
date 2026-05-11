@@ -1,0 +1,40 @@
+{{- if .Values.memory.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-memory
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "turboprivate.labels" . | nindent 4 }}
+    component: memory
+spec:
+  replicas: {{ .Values.memory.replicas }}
+  selector:
+    matchLabels:
+      component: memory
+  template:
+    metadata:
+      labels:
+        component: memory
+    spec:
+      containers:
+        - name: memory
+          image: {{ .Values.memory.image }}
+          ports:
+            - containerPort: 8003
+          env:
+            - name: EMBEDDING_MODEL
+              value: "{{ .Values.memory.embedding_model }}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-memory
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    component: memory
+  ports:
+    - port: 8003
+      targetPort: 8003
+{{- end }}

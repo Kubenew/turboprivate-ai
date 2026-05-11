@@ -1,0 +1,54 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    command: uvicorn turbo.api.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    environment:
+      - TURBO_INFERENCE__BACKEND=auto
+      - TURBO_SAFETY__ENABLED=true
+      - TURBO_AUTH__JWT_SECRET=dev-secret-change-me
+
+  worker:
+    build: .
+    command: celery -A worker worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - api
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: turboprivate
+      POSTGRES_USER: turbo
+      POSTGRES_PASSWORD: turbo-dev
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  pgdata:

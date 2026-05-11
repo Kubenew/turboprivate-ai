@@ -1,0 +1,10 @@
+from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+
+
+class SafetyGateMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path.startswith("/v1/chat/completions"):
+            await request.body()
+        response = await call_next(request)
+        return response

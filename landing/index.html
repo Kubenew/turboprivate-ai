@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TurboPrivate AI — Private & Safe Enterprise AI Inference</title>
+  <meta name="description" content="Self-hosted AI inference 40-60% cheaper than hyperscalers, with built-in defensive safety and full governance. Deploy in 15 minutes.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+  <!-- Background Effects -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow--purple"></div>
+  <div class="bg-glow bg-glow--teal"></div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="container nav__inner">
+      <a href="#" class="nav__logo">
+        <div class="nav__logo-icon">⚡</div>
+        TurboPrivate AI
+      </a>
+      <div class="nav__links">
+        <a href="#features" class="nav__link">Features</a>
+        <a href="#architecture" class="nav__link">Architecture</a>
+        <a href="#benchmarks" class="nav__link">Benchmarks</a>
+        <a href="#pricing" class="nav__link">Pricing</a>
+        <a href="https://github.com/Kubenew/turboprivate-ai" target="_blank" class="nav__link">GitHub</a>
+        <a href="#cta" class="nav__cta">Get Started</a>
+      </div>
+      <button class="nav__hamburger" aria-label="Menu">☰</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="container hero__content">
+      <div class="hero__badge">
+        <span class="hero__badge-dot"></span>
+        Powered by Mythos Safe + TurboQuant
+      </div>
+      <h1 class="hero__title">
+        <span class="hero__title-gradient">Private & Safe</span><br>
+        Enterprise AI
+      </h1>
+      <p class="hero__subtitle">
+        Self-hosted LLM inference <strong>40–60% cheaper</strong> than hyperscalers,
+        with built-in <strong>defensive safety</strong> and full <strong>governance audit trails</strong>.
+        Deploy on your own infrastructure in 15 minutes.
+      </p>
+      <div class="hero__actions">
+        <a href="#cta" class="btn btn--primary">
+          🚀 Deploy Now
+        </a>
+        <a href="#architecture" class="btn btn--outline">
+          📐 View Architecture
+        </a>
+      </div>
+      <div class="hero__stats">
+        <div class="hero__stat">
+          <div class="hero__stat-value" data-count="60" data-suffix="%" data-prefix="~">~0%</div>
+          <div class="hero__stat-label">Cost Savings</div>
+        </div>
+        <div class="hero__stat">
+          <div class="hero__stat-value" data-count="120" data-suffix=" tok/s">0 tok/s</div>
+          <div class="hero__stat-label">Throughput (8B INT4)</div>
+        </div>
+        <div class="hero__stat">
+          <div class="hero__stat-value" data-count="30" data-suffix="ms" data-prefix="<">0ms</div>
+          <div class="hero__stat-label">First Token Latency</div>
+        </div>
+        <div class="hero__stat">
+          <div class="hero__stat-value">100%</div>
+          <div class="hero__stat-label">Data On-Premises</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section__header reveal">
+        <div class="section__label">Capabilities</div>
+        <h2 class="section__title">Everything You Need for Enterprise AI</h2>
+        <p class="section__subtitle">Fast inference, defensive safety, and self-hosted sovereignty — in one deployable stack.</p>
+      </div>
+      <div class="features__grid">
+        <!-- TurboQuant -->
+        <div class="feature-card reveal">
+          <div class="feature-card__icon feature-card__icon--teal">⚡</div>
+          <h3 class="feature-card__title">TurboQuant INT4 Inference</h3>
+          <p class="feature-card__desc">
+            Group-wise INT4 quantization with activation-aware scaling (AWQ) and protected channels.
+            Run 8B models at 120+ tok/s on a single RTX 4090. One command to quantize any HuggingFace model.
+          </p>
+        </div>
+        <!-- Mythos Safe -->
+        <div class="feature-card reveal">
+          <div class="feature-card__icon feature-card__icon--pink">🛡️</div>
+          <h3 class="feature-card__title">Mythos Safe Governance</h3>
+          <p class="feature-card__desc">
+            Defensive cyber evaluation with 4 specialized verifiers. Every inference request gets a safety score.
+            Full audit trail in PostgreSQL. Policy-based blocking for compliance requirements.
+          </p>
+        </div>
+        <!-- PrivateCloud -->
+        <div class="feature-card reveal">
+          <div class="feature-card__icon feature-card__icon--purple">☁️</div>
+          <h3 class="feature-card__title">One-Click Deployment</h3>
+          <p class="feature-card__desc">
+            Provision a complete Kubernetes cluster with a single command.
+            Supports bare-metal, Proxmox, HPE Morpheus, and Hetzner Cloud.
+            Helm-based service installation with production-ready defaults.
+          </p>
+        </div>
+        <!-- OpenAI Compatible -->
+        <div class="feature-card reveal">
+          <div class="feature-card__icon feature-card__icon--teal">🔌</div>
+          <h3 class="feature-card__title">OpenAI-Compatible API</h3>
+          <p class="feature-card__desc">
+            Drop-in replacement for OpenAI's API. Use your existing SDKs and integrations.
+            /v1/chat/completions, /v1/embeddings, /v1/models — all work out of the box.
+          </p>
+        </div>
+        <!-- Observability -->
+        <div class="feature-card reveal">
+          <div class="feature-card__icon feature-card__icon--pink">📊</div>
+          <h3 class="feature-card__title">Built-In Observability</h3>
+          <p class="feature-card__desc">
+            Prometheus metrics, Grafana dashboards, and OpenTelemetry tracing.
+            Monitor inference latency, safety gate hit rates, GPU utilization, and cost per token in real time.
+          </p>
+        </div>
+        <!-- Data Sovereignty -->
+        <div class="feature-card reveal">
+          <div class="feature-card__icon feature-card__icon--purple">🔒</div>
+          <h3 class="feature-card__title">Full Data Sovereignty</h3>
+          <p class="feature-card__desc">
+            Zero external API calls. All data stays on your infrastructure.
+            No vendor lock-in. Run on any hardware — from a single GPU workstation to a multi-node cluster.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="section" id="architecture">
+    <div class="container">
+      <div class="section__header reveal">
+        <div class="section__label">How It Works</div>
+        <h2 class="section__title">Full-Stack Architecture</h2>
+        <p class="section__subtitle">Every layer designed for speed, safety, and simplicity.</p>
+      </div>
+      <div class="arch reveal">
+        <div class="arch__diagram">
+          <!-- Client Layer -->
+          <div class="arch__layer">
+            <div class="arch__node arch__node--gateway">
+              <div class="arch__node-title">CLI / SDK / Dashboard</div>
+              <div class="arch__node-sub">turbo deploy · turbo serve</div>
+            </div>
+          </div>
+          <div class="arch__arrow">↓</div>
+          <!-- Gateway Layer -->
+          <div class="arch__layer">
+            <div class="arch__node arch__node--gateway">
+              <div class="arch__node-title">API Gateway</div>
+              <div class="arch__node-sub">FastAPI · Auth · Rate Limiting</div>
+            </div>
+          </div>
+          <div class="arch__arrow">↓</div>
+          <!-- Safety + Inference -->
+          <div class="arch__layer">
+            <div class="arch__node arch__node--safety">
+              <div class="arch__node-title">🛡️ Safety Layer</div>
+              <div class="arch__node-sub">Mythos Safe Verifiers · Audit</div>
+            </div>
+            <div class="arch__node arch__node--inference">
+              <div class="arch__node-title">⚡ Inference Engine</div>
+              <div class="arch__node-sub">TurboQuant INT4 · vLLM</div>
+            </div>
+          </div>
+          <div class="arch__arrow">↓</div>
+          <!-- Memory + RAG -->
+          <div class="arch__layer">
+            <div class="arch__node arch__node--infra">
+              <div class="arch__node-title">Memory & RAG</div>
+              <div class="arch__node-sub">TurboMemory · pdf2struct</div>
+            </div>
+          </div>
+          <div class="arch__arrow">↓</div>
+          <!-- Infrastructure -->
+          <div class="arch__layer">
+            <div class="arch__node arch__node--infra">
+              <div class="arch__node-title">K3s Cluster</div>
+              <div class="arch__node-sub">PrivateCloud · Helm</div>
+            </div>
+            <div class="arch__node arch__node--infra">
+              <div class="arch__node-title">Monitoring</div>
+              <div class="arch__node-sub">Prometheus · Grafana</div>
+            </div>
+            <div class="arch__node arch__node--infra">
+              <div class="arch__node-title">Storage</div>
+              <div class="arch__node-sub">PostgreSQL · Redis · Longhorn</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benchmarks -->
+  <section class="section" id="benchmarks">
+    <div class="container">
+      <div class="section__header reveal">
+        <div class="section__label">Performance</div>
+        <h2 class="section__title">Why Self-Hosted Wins</h2>
+        <p class="section__subtitle">RTX 4090 running Llama 3 8B INT4 via TurboQuant vs. public cloud APIs.</p>
+      </div>
+      <div class="bench__table-wrap reveal">
+        <table class="bench__table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>TurboPrivate AI<br><span style="font-weight:400;text-transform:none;letter-spacing:0">RTX 4090 · Self-hosted</span></th>
+              <th>GPT-4o-mini<br><span style="font-weight:400;text-transform:none;letter-spacing:0">OpenAI API</span></th>
+              <th>Claude Haiku<br><span style="font-weight:400;text-transform:none;letter-spacing:0">Anthropic API</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>First Token Latency</td>
+              <td class="bench__highlight">~30ms</td>
+              <td class="bench__dim">~200ms</td>
+              <td class="bench__dim">~300ms</td>
+            </tr>
+            <tr>
+              <td>Throughput</td>
+              <td class="bench__highlight">~120 tok/s</td>
+              <td class="bench__dim">~80 tok/s</td>
+              <td class="bench__dim">~60 tok/s</td>
+            </tr>
+            <tr>
+              <td>Cost / 1M tokens</td>
+              <td class="bench__highlight">~$0.02</td>
+              <td class="bench__dim">$0.15</td>
+              <td class="bench__dim">$0.25</td>
+            </tr>
+            <tr>
+              <td>Data Leaves Premises</td>
+              <td><span class="bench__badge bench__badge--yes">Never</span></td>
+              <td><span class="bench__badge bench__badge--no">Always</span></td>
+              <td><span class="bench__badge bench__badge--no">Always</span></td>
+            </tr>
+            <tr>
+              <td>Built-in Safety Audit</td>
+              <td><span class="bench__badge bench__badge--yes">✓ Included</span></td>
+              <td><span class="bench__badge bench__badge--no">✗ None</span></td>
+              <td><span class="bench__badge bench__badge--no">✗ None</span></td>
+            </tr>
+            <tr>
+              <td>Defensive Cyber Eval</td>
+              <td><span class="bench__badge bench__badge--yes">✓ 4 Verifiers</span></td>
+              <td><span class="bench__badge bench__badge--no">✗ None</span></td>
+              <td><span class="bench__badge bench__badge--no">✗ None</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="section" id="pricing">
+    <div class="container">
+      <div class="section__header reveal">
+        <div class="section__label">Pricing</div>
+        <h2 class="section__title">Start Free, Scale When Ready</h2>
+        <p class="section__subtitle">Open-source core with optional enterprise support.</p>
+      </div>
+      <div class="pricing__grid">
+        <!-- Community -->
+        <div class="pricing-card reveal">
+          <div class="pricing-card__tier">Community</div>
+          <div class="pricing-card__price">Free</div>
+          <div class="pricing-card__period">Open source · MIT License</div>
+          <ul class="pricing-card__features">
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Full inference engine</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> TurboQuant INT4/AWQ</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Basic safety verifiers</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Grafana dashboards</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Docker Compose deploy</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Community support</li>
+          </ul>
+          <a href="https://github.com/Kubenew/turboprivate-ai" class="btn btn--outline">View on GitHub</a>
+        </div>
+        <!-- Pro -->
+        <div class="pricing-card pricing-card--featured reveal">
+          <div class="pricing-card__popular">Most Popular</div>
+          <div class="pricing-card__tier">Pro</div>
+          <div class="pricing-card__price">$99<span style="font-size:1.2rem;font-weight:400">/mo</span></div>
+          <div class="pricing-card__period">Per cluster · billed annually</div>
+          <ul class="pricing-card__features">
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Everything in Community</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Up to 5 models per cluster</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Full governance & audit</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Compliance reporting</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Helm chart + K8s deploy</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Priority email support</li>
+          </ul>
+          <a href="#cta" class="btn btn--primary">Start Free Trial</a>
+        </div>
+        <!-- Enterprise -->
+        <div class="pricing-card reveal">
+          <div class="pricing-card__tier">Enterprise</div>
+          <div class="pricing-card__price">Custom</div>
+          <div class="pricing-card__period">Tailored to your needs</div>
+          <ul class="pricing-card__features">
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Everything in Pro</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Multi-cluster management</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> SSO / SAML integration</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Custom safety verifiers</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> On-premise deployment</li>
+            <li class="pricing-card__feature"><span class="pricing-card__check">✓</span> Dedicated SLA & support</li>
+          </ul>
+          <a href="mailto:felix@turboprivate.ai" class="btn btn--outline">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section" id="cta">
+    <div class="container">
+      <div class="cta reveal">
+        <h2 class="cta__title">Deploy Enterprise AI in 15 Minutes</h2>
+        <p class="cta__subtitle">
+          One command to install. Zero data leaves your premises. Full safety governance from day one.
+        </p>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+          <a href="https://github.com/Kubenew/turboprivate-ai" class="btn btn--primary">
+            ⭐ Star on GitHub
+          </a>
+          <a href="https://github.com/Kubenew/turboprivate-ai#quickstart" class="btn btn--outline">
+            📖 Read the Docs
+          </a>
+        </div>
+        <div style="margin-top:32px;padding:16px 24px;border-radius:var(--radius-md);background:rgba(0,0,0,0.3);display:inline-block;font-family:monospace;font-size:0.95rem;color:var(--accent-2)">
+          pip install turboprivate &amp;&amp; turbo deploy
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__copy">© 2026 TurboPrivate AI — Built by <a href="https://github.com/Kubenew" style="color:var(--accent-1)">Kubenew</a></div>
+      <div class="footer__links">
+        <a href="https://github.com/Kubenew/turboprivate-ai" class="footer__link">GitHub</a>
+        <a href="https://github.com/Kubenew/mythos_safe_enterprise" class="footer__link">Mythos Safe</a>
+        <a href="https://github.com/Kubenew/privatecloud" class="footer__link">PrivateCloud</a>
+        <a href="https://github.com/Kubenew/TurboQuant-v3" class="footer__link">TurboQuant</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

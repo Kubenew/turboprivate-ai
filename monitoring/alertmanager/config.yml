@@ -1,0 +1,6 @@
+route:
+  receiver: default
+  repeat_interval: 4h
+
+receivers:
+  - name: default

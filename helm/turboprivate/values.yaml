@@ -1,0 +1,72 @@
+global:
+  namespace: turboprivate
+
+api:
+  image: turboprivate/api:latest
+  replicas: 2
+  port: 8000
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+
+inference:
+  enabled: true
+  image: turboprivate/inference:latest
+  replicas: 2
+  gpu:
+    enabled: true
+    type: auto
+  models:
+    - name: llama3-8b-int4
+      source: huggingface
+  batching:
+    max_batch_size: 32
+    max_wait_ms: 50
+
+safety:
+  enabled: true
+  image: turboprivate/safety:latest
+  replicas: 1
+  pre_flight: true
+  post_flight: true
+  sandbox: gvisor
+
+memory:
+  enabled: true
+  image: turboprivate/memory:latest
+  replicas: 1
+  embedding_model: BAAI/bge-small-en-v1.5
+  storage: 10Gi
+
+auth:
+  enabled: true
+  provider: jwt
+  jwt_secret: change-me-in-production
+
+worker:
+  enabled: true
+  image: turboprivate/worker:latest
+  replicas: 2
+  concurrency: 4
+
+postgresql:
+  enabled: true
+  size: 10Gi
+
+redis:
+  enabled: true
+  size: 5Gi
+
+monitoring:
+  prometheus: true
+  grafana: true
+  tracing: true
+
+ingress:
+  enabled: true
+  host: turbo.local
+  tls: false

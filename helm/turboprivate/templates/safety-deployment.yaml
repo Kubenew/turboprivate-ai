@@ -1,0 +1,42 @@
+{{- if .Values.safety.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-safety
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "turboprivate.labels" . | nindent 4 }}
+    component: safety
+spec:
+  replicas: {{ .Values.safety.replicas }}
+  selector:
+    matchLabels:
+      component: safety
+  template:
+    metadata:
+      labels:
+        component: safety
+    spec:
+      containers:
+        - name: safety
+          image: {{ .Values.safety.image }}
+          ports:
+            - containerPort: 8002
+          env:
+            - name: PRE_FLIGHT
+              value: "{{ .Values.safety.pre_flight }}"
+            - name: POST_FLIGHT
+              value: "{{ .Values.safety.post_flight }}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-safety
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    component: safety
+  ports:
+    - port: 8002
+      targetPort: 8002
+{{- end }}

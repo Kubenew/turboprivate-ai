@@ -1,0 +1,11 @@
+apiVersion: v2
+name: turboprivate
+description: TurboPrivate AI - Self-hosted LLM inference + enterprise safety governance
+type: application
+version: 0.1.0
+appVersion: 0.1.0
+keywords:
+  - llm
+  - inference
+  - safety
+  - ai-governance

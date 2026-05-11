@@ -1,0 +1,26 @@
+{{- if .Values.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-worker
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "turboprivate.labels" . | nindent 4 }}
+    component: worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      component: worker
+  template:
+    metadata:
+      labels:
+        component: worker
+    spec:
+      containers:
+        - name: worker
+          image: {{ .Values.worker.image }}
+          env:
+            - name: CELERY_CONCURRENCY
+              value: "{{ .Values.worker.concurrency }}"
+{{- end }}
