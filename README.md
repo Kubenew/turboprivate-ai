@@ -101,6 +101,18 @@ CLI / SDK / Dashboard
 
 ## Changelog
 
+### 0.1.2 (2026-05-11)
+- Enterprise-ready README with pricing table and benchmarks
+- Added docs/ARCHITECTURE.md with system design diagrams
+- Added docs/DEPLOYMENT.md with production deployment guide
+- Added examples/ with HTTP, safety, RAG, and quantization samples
+- Added .env.example with all configuration options
+- Added benchmarks/ with RTX 4090 performance results
+- Switched license from MIT to Apache 2.0
+- Added `turbo doctor` CLI command for system health checks
+- Added GitHub Actions Docker build workflow
+- Updated pyproject.toml with `full` install extra
+
 ### 0.1.1 (2026-05-11)
 - Migrated to hatchling build system
 - Fixed missing `InferenceEngine` import in `turbo.inference`

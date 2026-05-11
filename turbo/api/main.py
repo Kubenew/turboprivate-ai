@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(
         title="TurboPrivate AI",
-        version="0.1.1",
+        version="0.1.2",
         lifespan=lifespan,
     )
 
