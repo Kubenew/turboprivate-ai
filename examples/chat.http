@@ -1,0 +1,22 @@
+### Chat Completions (OpenAI-compatible)
+POST http://localhost:8000/v1/chat/completions
+Content-Type: application/json
+
+{
+  "model": "llama3-8b-int4",
+  "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "What is the capital of France?"}
+  ],
+  "max_tokens": 100,
+  "temperature": 0.7
+}
+
+### Embeddings
+POST http://localhost:8000/v1/embeddings
+Content-Type: application/json
+
+{
+  "model": "llama3-8b-int4",
+  "input": "The quick brown fox jumps over the lazy dog"
+}

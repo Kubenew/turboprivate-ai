@@ -228,6 +228,42 @@ def backups():
 
 
 @cli.command()
+def doctor():
+    """Check system health and dependencies."""
+    import sys
+
+    click.echo("TurboPrivate AI System Check")
+    click.echo("=" * 40)
+    click.echo(f"Python: {sys.version.split()[0]}")
+    click.echo(f"Platform: {sys.platform}")
+
+    try:
+        import torch
+        click.echo(f"PyTorch: {torch.__version__}")
+        click.echo(f"CUDA available: {torch.cuda.is_available()}")
+        if torch.cuda.is_available():
+            click.echo(f"GPU: {torch.cuda.get_device_name(0)}")
+            click.echo(f"VRAM: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
+    except ImportError:
+        click.echo("PyTorch: not installed")
+
+    try:
+        import vllm  # noqa: F401
+        click.echo("vLLM: installed")
+    except ImportError:
+        click.echo("vLLM: not installed")
+
+    try:
+        import fastapi  # noqa: F401
+        click.echo(f"FastAPI: {fastapi.__version__}")
+    except ImportError:
+        click.echo("FastAPI: not installed")
+
+    click.echo("")
+    click.echo("System: " + ("✓ All good" if torch.cuda.is_available() else "⚠ No GPU detected"))
+
+
+@cli.command()
 @click.option("--service", default="all", help="Service name")
 def logs(service: str):
     """View platform logs."""
