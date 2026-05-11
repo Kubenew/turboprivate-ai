@@ -1,5 +1,14 @@
 # TurboPrivate AI
 
+<p align="center">
+  <a href="https://pypi.org/project/turboprivate-ai/"><img src="https://img.shields.io/pypi/v/turboprivate-ai?color=blue&logo=pypi" alt="PyPI version"></a>
+  <a href="https://pypi.org/project/turboprivate-ai/"><img src="https://img.shields.io/pypi/pyversions/turboprivate-ai?logo=python" alt="Python versions"></a>
+  <a href="https://github.com/Kubenew/turboprivate-ai/actions"><img src="https://img.shields.io/github/actions/workflow/status/Kubenew/turboprivate-ai/ci.yml?branch=main&logo=github" alt="CI status"></a>
+  <a href="https://pypi.org/project/turboprivate-ai/"><img src="https://img.shields.io/pypi/dm/turboprivate-ai?logo=pypi" alt="Downloads"></a>
+  <a href="https://github.com/Kubenew/turboprivate-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Kubenew/turboprivate-ai?logo=open-source-initiative" alt="License"></a>
+  <a href="https://github.com/Kubenew/turboprivate-ai"><img src="https://img.shields.io/github/stars/Kubenew/turboprivate-ai?logo=github" alt="Stars"></a>
+</p>
+
 Unified platform for self-hosted LLM inference + enterprise safety governance.
 
 ## Features
