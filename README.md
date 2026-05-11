@@ -59,13 +59,17 @@ Or use Docker Compose for quick testing:
 docker compose -f docker-compose.full.yml up -d
 ```
 
-## Commercial Use
+## Pricing
 
-| Tier | Price | Includes |
-|---|---|---|
-| **PoC / Pilot** | €15,000 – €35,000 | Full deployment + training + 30-day support |
-| **Enterprise License** | Custom | Per cluster / per user, SLA, dedicated support |
-| **Managed Service** | Custom | Fully managed infrastructure + operations |
+| Tier | Price | Best For | Includes |
+|---|---|---|---|
+| **PoC / Pilot** | €15,000 – €35,000 | 4–8 weeks trial | Deployment, 2 models, training, support |
+| **Enterprise License** | €65,000 / year | Single cluster, up to 10 users | Full features, unlimited models, SLA 99.5% |
+| **Enterprise Plus** | €120,000 – €180,000 / year | Multiple clusters, 50+ users | Priority support, custom verifiers, SOC2 |
+| **Managed Service** | €8,000 – €25,000 / month | No ops team | Fully managed by us |
+
+**Volume discounts** available for 3+ clusters.  
+All prices exclude hardware.
 
 Interested in a private demo?  
 📅 [Book a 30-min PoC Call](mailto:felix@turboprivate.ai) | ✉️ [Contact Sales](mailto:felix@turboprivate.ai)
