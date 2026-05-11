@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import Request
 
 from turbo.config import config
@@ -56,3 +58,6 @@ async def init_app_state(app):
 async def shutdown_app_state(app):
     await app.state.inference_engine.unload()
     await app.state.inference_gateway.close()
+    if hasattr(app.state, "audit_trail") and hasattr(app.state.audit_trail, "storage_path"):
+        logger = logging.getLogger("turboprivate.shutdown")
+        logger.info("Audit trail flushed")

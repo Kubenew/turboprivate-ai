@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=69.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "turboprivate-ai"
-version = "0.1.0"
+version = "0.1.1"
 description = "Unified platform for self-hosted LLM inference + enterprise safety governance"
 readme = "README.md"
 license = {text = "MIT"}
@@ -41,7 +41,9 @@ memory = [
     "chromadb>=0.5.0",
     "sentence-transformers>=3.0.0",
     "pypdf>=4.2.0",
-    "unstructured>=0.14.0",
+    "pdfplumber>=0.10.0",
+    "python-docx>=1.1.0",
+    "beautifulsoup4>=4.12.0",
 ]
 infra = [
     "kubernetes>=30.0.0",
@@ -67,6 +69,7 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "httpx>=0.27.0",
     "pytest-localserver>=0.9.0",
+    "ruff>=0.1",
 ]
 all = [
     "turboprivate-ai[inference,safety,memory,infra,auth,observability,worker,dev]",
@@ -75,8 +78,13 @@ all = [
 [project.scripts]
 turbo = "turbo.cli:cli"
 
-[tool.setuptools.packages.find]
-include = ["turbo*", "worker*"]
+[project.urls]
+Homepage = "https://github.com/Kubenew/turboprivate-ai"
+Source = "https://github.com/Kubenew/turboprivate-ai"
+Issues = "https://github.com/Kubenew/turboprivate-ai/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["turbo", "worker"]
 
 [tool.ruff]
 line-length = 100
@@ -88,3 +96,4 @@ select = ["E", "F", "I", "N", "W", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+asyncio_mode = "auto"

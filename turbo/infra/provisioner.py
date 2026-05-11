@@ -154,5 +154,6 @@ class Provisioner:
                 "status": "running",
                 "node_count": len(nodes.get("items", [])),
             }
-        except Exception:
+        except Exception as e:
+            logger.warning("Failed to get cluster status: %s", e)
             return {"cluster": cluster_name, "status": "unknown", "node_count": 0}

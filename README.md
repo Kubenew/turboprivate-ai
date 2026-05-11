@@ -29,6 +29,19 @@ pip install turboprivate-ai
 turbo serve --reload
 ```
 
+## Changelog
+
+### 0.1.1 (2026-05-11)
+
+- Migrated to hatchling build system
+- Fixed missing `InferenceEngine` import in `turbo.inference`
+- Fixed `TracerProvider` bug in OpenTelemetry instrumentation
+- Added structured logging to all exception handlers
+- Consolidated Celery workers into shared `worker.celery_app`
+- Added CI workflow with ruff linting + pytest
+- Improved graceful shutdown (audit trail flush)
+- Updated dependencies (replaced `unstructured` with actual used libs)
+
 ## Documentation
 
 - `turbo/cli.py` — CLI entry point and command reference

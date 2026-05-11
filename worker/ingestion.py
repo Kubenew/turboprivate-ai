@@ -1,6 +1,4 @@
-from celery import Celery
-
-app = Celery("turboprivate", broker="redis://localhost:6379/0")
+from worker.celery_app import app
 
 
 @app.task

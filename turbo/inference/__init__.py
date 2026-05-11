@@ -1,5 +1,6 @@
 from turbo.inference.batch import BatchRequest, DynamicBatcher
 from turbo.inference.cache import KVCache, PromptCache
+from turbo.inference.engine import InferenceEngine
 from turbo.inference.gateway import InferenceGateway
 from turbo.inference.quantize import Quantizer
 

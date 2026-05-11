@@ -48,7 +48,8 @@ class InferenceGateway:
             resp.raise_for_status()
             backend.last_latency_ms = (time.time() - t0) * 1000
             return resp.json()
-        except Exception:
+        except Exception as e:
+            logger.warning("Forward request to %s failed: %s", backend.url, e)
             backend.last_latency_ms = (time.time() - t0) * 1000
             backend.healthy = False
             raise
@@ -70,15 +71,16 @@ class InferenceGateway:
                     b.healthy = bool(ok) and ok is not True
                 healthy = sum(1 for b in all_backends if b.healthy)
                 logger.info(f"Health check: {healthy}/{len(all_backends)} backends healthy")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error("Health check error: %s", e)
             await asyncio.sleep(interval)
 
     async def _ping(self, backend: Backend, path: str, timeout: int) -> bool:
         try:
             resp = await self._client.get(f"{backend.url}{path}")
             return resp.is_success
-        except Exception:
+        except Exception as e:
+            logger.debug("Backend %s ping failed: %s", backend.url, e)
             return False
 
     def start_health_checks(self, interval: int = 5, timeout: int = 2, path: str = "/health"):

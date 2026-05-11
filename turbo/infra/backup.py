@@ -31,8 +31,8 @@ class BackupManager:
             )
             stdout, _ = await proc.communicate()
             (backup_dir / "cluster_resources.yaml").write_text(stdout.decode())
-        except Exception:
-            logger.warning("Could not backup Kubernetes resources")
+        except Exception as e:
+            logger.warning("Could not backup Kubernetes resources: %s", e)
         tarball = self.backup_path / f"{backup_name}.tar.gz"
         with tarfile.open(tarball, "w:gz") as tar:
             tar.add(backup_dir, arcname=backup_name)
@@ -101,5 +101,6 @@ class BackupManager:
             with tarfile.open(backup_file, "r:gz") as tar:
                 members = tar.getmembers()
             return len(members) > 0
-        except Exception:
+        except Exception as e:
+            logger.warning("Backup verification failed for %s: %s", name, e)
             return False
