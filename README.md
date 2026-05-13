@@ -95,6 +95,12 @@ CLI / SDK / Dashboard
 └──────────┘ └──────────┘ └──────────┘
 ```
 
+## Demo
+
+<p align="center">
+  <img src="demo/turboprivate-demo.gif" alt="TurboPrivate AI deployment demo" width="100%">
+</p>
+
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md) — Full system design
@@ -102,6 +108,7 @@ CLI / SDK / Dashboard
 - [CLI Reference](turbo/cli.py) — All CLI commands
 - [API Reference](turbo/api/main.py) — FastAPI routes
 - [Safety Gate](turbo/safety/gate.py) — Verifier configuration
+- [Demo Assets](demo/) — GIF recording tape + deploy script
 
 ## Changelog
 

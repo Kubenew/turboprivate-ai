@@ -1,84 +1,77 @@
 Output: turboprivate-demo.gif
-FontSize: 16
+FontFamily: "Cascadia Code", "JetBrains Mono", "Consolas"
+FontSize: 14
 Width: 900
-Height: 600
-TypingSpeed: 80ms
+Height: 540
+Theme: Dracula
+TypingSpeed: 50ms
 
-# Show the logo and doctor check
-Type "turbo doctor"
+Show "     TurboPrivate AI  v0.1.0  —  Self-Hosted LLM + Safety Governance"
 Sleep 1s
+
+Type "turbo doctor"
+Sleep 300ms
 Enter
 Sleep 4s
 
-# Clear and show CLI help
 Type "clear"
+Sleep 200ms
 Enter
 Type "turbo --help"
+Sleep 300ms
 Enter
 Sleep 3s
 
-# Show model commands
 Type "turbo model --help"
+Sleep 200ms
 Enter
 Sleep 2s
 
-# Show safety commands
-Type "turbo safety --help"
-Enter
-Sleep 2s
-
-# Show infra commands
-Type "turbo infra --help"
-Enter
-Sleep 2s
-
-# Pull a model
 Type "clear"
+Sleep 200ms
 Enter
+Type "turbo safety --help"
+Sleep 200ms
+Enter
+Sleep 2s
+
 Type "turbo model pull meta-llama/Llama-3-8B"
+Sleep 200ms
 Enter
 Sleep 2s
 
-# Quantize it
-Type "turbo model quantize meta-llama/Llama-3-8B --bits 4 --method awq"
-Enter
-Sleep 3s
-
-# Serve it
-Type "turbo model serve meta-llama/Llama-3-8B --replicas 2"
+Type "turbo model quantize meta-llama/Llama-3-8B --bits 4"
+Sleep 200ms
 Enter
 Sleep 2s
 
-# Check safety
-Type "turbo safety status"
+Type "clear"
+Sleep 200ms
+Enter
+Type "turbo safety check"
+Sleep 200ms
 Enter
 Sleep 2s
 
-# View audit
-Type "turbo audit view --hours 48 --blocked-only"
+Type "turbo infra init --name my-cluster"
+Sleep 200ms
 Enter
 Sleep 2s
 
-# Create a backup
-Type "turbo backup --name pre-deploy --encrypt"
+Type "turbo backup --name pre-deploy"
+Sleep 200ms
 Enter
 Sleep 2s
 
-# Generate infra config
-Type "turbo infra init --provider bare-metal --name prod-cluster"
+Type "clear"
+Sleep 200ms
 Enter
-Sleep 2s
-
-# Deploy
-Type "turbo infra deploy --config turboprivate.yaml"
-Enter
-Sleep 3s
-
-# Final status
 Type "turbo doctor"
+Sleep 300ms
 Enter
 Sleep 3s
 
-Type "echo '🚀 TurboPrivate AI deployed successfully!'"
+Type "echo '=== TurboPrivate AI deployed! Visit http://localhost:8000/docs ==='"
+Sleep 200ms
 Enter
 Sleep 2s

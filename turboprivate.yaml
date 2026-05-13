@@ -1,0 +1,10 @@
+cluster_name: my-cluster
+k3s_version: v1.30.0+k3s1
+nodes: []
+provider: bare-metal
+services:
+  cert_manager: true
+  ingress_nginx: true
+  longhorn: true
+  metallb: true
+  monitoring: true
