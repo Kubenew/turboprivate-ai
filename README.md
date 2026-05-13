@@ -98,7 +98,7 @@ CLI / SDK / Dashboard
 ## Demo
 
 <p align="center">
-  <img src="demo/turboprivate-demo.gif" alt="TurboPrivate AI deployment demo" width="100%">
+  <img src="https://raw.githubusercontent.com/Kubenew/turboprivate-ai/main/demo/turboprivate-demo.gif" alt="TurboPrivate AI deployment demo" width="100%">
 </p>
 
 ## Documentation
@@ -111,6 +111,10 @@ CLI / SDK / Dashboard
 - [Demo Assets](demo/) — GIF recording tape + deploy script
 
 ## Changelog
+
+### 0.1.3 (2026-05-13)
+- Extended demo GIF to 61s with 5-scene animation (intro, deploy, serve+chat, safety block, dashboard)
+- Switched README GIF to absolute GitHub raw URL for PyPI rendering
 
 ### 0.1.2 (2026-05-11)
 - Enterprise-ready README with pricing table and benchmarks
