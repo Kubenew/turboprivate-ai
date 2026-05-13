@@ -26,9 +26,18 @@ async def ingest_documents(
     req: IngestRequest,
     rag: RAGPipeline = Depends(get_rag_pipeline),
 ):
-    ids = await rag.ingest_text(text=req.text, collection=req.collection, source=req.source)
+    ids = await rag.ingest_text(
+        text=req.text,
+        collection=req.collection,
+        source=req.source,
+    )
     stats = await rag.store.stats()
-    return {"status": "completed", "ids": ids, "documents_ingested": len(ids), "stats": stats}
+    return {
+        "status": "completed",
+        "ids": ids,
+        "documents_ingested": len(ids),
+        "stats": stats,
+    }
 
 
 @router.get("/memory/search")
@@ -38,12 +47,25 @@ async def search_memory(
     top_k: int = 5,
     rag: RAGPipeline = Depends(get_rag_pipeline),
 ):
-    results = await rag.query(question=q, collection=collection, top_k=top_k)
-    return {"results": results, "query": q, "collection": collection, "total": len(results)}
+    results = await rag.query(
+        question=q, collection=collection, top_k=top_k
+    )
+    return {
+        "results": results,
+        "query": q,
+        "collection": collection,
+        "total": len(results),
+    }
 
 
 @router.get("/memory/stats")
-async def memory_stats(store: EmbeddingStore = Depends(get_memory_store)):
+async def memory_stats(
+    store: EmbeddingStore = Depends(get_memory_store),
+):
     stats = await store.stats()
     collections = await store.list_collections()
-    return {"collections": collections, "document_counts": stats, "total_documents": sum(stats.values())}
+    return {
+        "collections": collections,
+        "document_counts": stats,
+        "total_documents": sum(stats.values()),
+    }

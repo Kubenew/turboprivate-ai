@@ -2,18 +2,18 @@
 
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont
 
 
 def get_font(size=14):
     for name in ["CascadiaCode.ttf", "JetBrainsMono-Regular.ttf", "consola.ttf", "cour.ttf"]:
         try:
             return ImageFont.truetype(name, size)
-        except (OSError, IOError):
+        except OSError:
             pass
     try:
         return ImageFont.truetype("C:/Windows/Fonts/consola.ttf", size)
-    except (OSError, IOError):
+    except OSError:
         return ImageFont.load_default()
 
 
@@ -57,7 +57,11 @@ def draw_border_rect(draw, x, y, w, h, color=BORDER, radius=8):
     draw.rounded_rectangle([x, y, x + w, y + h], radius=radius, fill=color)
 
 
-def draw_terminal(draw, font, lines, title_bar=" TurboPrivate AI  —  Deployment Demo", show_step=True, step_txt=""):
+def draw_terminal(
+    draw, font, lines,
+    title_bar=" TurboPrivate AI  —  Deployment Demo",
+    show_step=True, step_txt=""
+):
     draw.rectangle([0, 0, WIDTH, HEIGHT], fill=BG)
     draw.rectangle([0, 0, WIDTH, 36], fill=BORDER)
     draw.text((12, 9), title_bar, font=font, fill=CYAN)
@@ -115,7 +119,6 @@ def scene_intro(font):
         logo = Image.alpha_composite(bg_logo, logo)
 
     frames = []
-    typing = ""
     full_cmd = "turbo deploy --provider bare-metal"
 
     for i in range(40):
@@ -134,15 +137,19 @@ def scene_intro(font):
         draw.text((WIDTH // 2 - font.getlength("TurboPrivate AI") // 2, title_y),
                    "TurboPrivate AI", font=font, fill=WHITE)
         subtitle_y = title_y + font.getbbox("Ag")[3] + 12
-        draw.text((WIDTH // 2 - font.getlength("Self-Hosted LLM Inference + Safety Governance") // 2, subtitle_y),
-                   "Self-Hosted LLM Inference + Safety Governance", font=font, fill=CYAN)
+        subtitle_txt = "Self-Hosted LLM Inference + Safety Governance"
+        draw.text((WIDTH // 2 - font.getlength(subtitle_txt) // 2, subtitle_y),
+                   subtitle_txt, font=font, fill=CYAN)
 
         cmd_y = subtitle_y + font.getbbox("Ag")[3] + 30
         draw_border_rect(draw, WIDTH // 2 - 260, cmd_y - 10, 520, 40)
         draw.text((WIDTH // 2 - 240, cmd_y), "$ ", font=font, fill=GREEN)
         n = min(i, len(full_cmd))
         typed = full_cmd[:n]
-        draw.text((WIDTH // 2 - 240 + font.getlength("$ "), cmd_y), typed + ("█" if n < len(full_cmd) else ""), font=font, fill=FG)
+        draw.text(
+            (WIDTH // 2 - 240 + font.getlength("$ "), cmd_y),
+            typed + ("█" if n < len(full_cmd) else ""), font=font, fill=FG
+        )
 
         frames.append(img)
 
@@ -215,9 +222,14 @@ def scene_deploy(font):
             elif pct == 100:
                 display.append("")
                 display.append(("  ✓ Cluster deployed successfully!", GREEN))
-                display.append(("  API: http://10.0.0.1:8000  |  Dashboard: http://10.0.0.1:5173", CYAN))
+                display.append((
+                    "  API: http://10.0.0.1:8000  |  Dashboard: http://10.0.0.1:5173", CYAN
+                ))
             draw_terminal(draw, font, display, step_txt="Deploying Cluster")
-            draw_progress_bar(draw, font, bar_x, bar_y, bar_w, bar_h, pct, "Deploying" if pct < 100 else "Done!")
+            draw_progress_bar(
+                draw, font, bar_x, bar_y, bar_w, bar_h, pct,
+                "Deploying" if pct < 100 else "Done!"
+            )
             frames.append(img)
     add_pause(frames, 15)
     return frames
@@ -227,7 +239,6 @@ def scene_serve_and_chat(font):
     """15-30s: turbo model serve + turbo chat with response."""
     frames = []
     full_cmd = "turbo model serve meta-llama/Llama-3-8B --replicas 2"
-    chars = ""
 
     # Type the serve command
     for i in range(len(full_cmd) + 6):
@@ -273,16 +284,15 @@ def scene_serve_and_chat(font):
         frames.append(img)
 
     # Thinking...
-    thinking = [
-        chat_cmd,
-        "",
-        "  Processing query via meta-llama/Llama-3-8B...",
-    ]
     for i in range(8):
         dots = "." * (i % 3 + 1)
         img = Image.new("RGB", (WIDTH, HEIGHT), BG)
         draw = ImageDraw.Draw(img)
-        draw_terminal(draw, font, [chat_cmd, "", f"  Processing query via meta-llama/Llama-3-8B{dots}"], step_txt="Chat — Generating")
+        draw_terminal(
+            draw, font,
+            [chat_cmd, "", f"  Processing query via meta-llama/Llama-3-8B{dots}"],
+            step_txt="Chat — Generating"
+        )
         frames.append(img)
 
     # Stream the response character by character
@@ -347,7 +357,11 @@ def scene_safety_block(font):
         for _ in range(3):
             img = Image.new("RGB", (WIDTH, HEIGHT), BG)
             draw = ImageDraw.Draw(img)
-            draw_terminal(draw, font, [malicious_cmd, "", ("  ═══ Mythos Safe — Pre-Flight Gate ═══", RED), "", v], step_txt="Safety — Scanning")
+            draw_terminal(
+                draw, font,
+                [malicious_cmd, "", ("  ═══ Mythos Safe — Pre-Flight Gate ═══", RED), "", v],
+                step_txt="Safety — Scanning"
+            )
             frames.append(img)
 
     # Block output with detailed scoring
@@ -467,7 +481,7 @@ def scene_outro(font):
                 else:
                     try:
                         f = ImageFont.truetype("C:/Windows/Fonts/consola.ttf", sz)
-                    except (OSError, IOError):
+                    except OSError:
                         f = font
                 tw = f.getlength(text)
                 draw.text((WIDTH // 2 - tw // 2, y_start), text, font=f, fill=color)
@@ -488,8 +502,6 @@ def hex_to_rgb(h):
 
 def main():
     font = get_font(16)
-    font_small = get_font(14)
-    big_font = font
 
     all_frames = []
     all_frames += scene_intro(font)

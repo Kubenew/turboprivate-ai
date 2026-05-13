@@ -8,7 +8,13 @@ logger = logging.getLogger("turboprivate.infra")
 
 
 class Node:
-    def __init__(self, host: str, user: str = "root", port: int = 22, role: str = "worker"):
+    def __init__(
+        self,
+        host: str,
+        user: str = "root",
+        port: int = 22,
+        role: str = "worker",
+    ):
         self.host = host
         self.user = user
         self.port = port
@@ -35,8 +41,16 @@ class Provisioner:
     def __init__(self, config: ClusterConfig):
         self.config = config
 
-    async def run_ssh(self, host: str, cmd: str, user: str = "root") -> tuple[int, str, str]:
-        ssh_cmd = ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10"]
+    async def run_ssh(
+        self, host: str, cmd: str, user: str = "root"
+    ) -> tuple[int, str, str]:
+        ssh_cmd = [
+            "ssh",
+            "-o",
+            "StrictHostKeyChecking=no",
+            "-o",
+            "ConnectTimeout=10",
+        ]
         if self.config.ssh_key_path:
             ssh_cmd += ["-i", str(self.config.ssh_key_path)]
         ssh_cmd += [f"{user}@{host}", cmd]
@@ -49,21 +63,30 @@ class Provisioner:
         return proc.returncode or 0, stdout.decode(), stderr.decode()
 
     async def provision(self, config_path: Path | None = None):
-        logger.info(f"Provisioning cluster: {self.config.name}")
+        logger.info("Provisioning cluster: %s", self.config.name)
         if self.config.provider == "bare-metal":
             await self._provision_bare_metal()
         elif self.config.provider in ("proxmox", "morpheus"):
             await self._provision_terraform()
         else:
-            raise ValueError(f"Unsupported provider: {self.config.provider}")
+            raise ValueError(
+                f"Unsupported provider: {self.config.provider}"
+            )
 
     async def _provision_bare_metal(self):
         if not self.config.nodes:
-            raise RuntimeError("No nodes configured for bare-metal provisioning")
-        master = next((n for n in self.config.nodes if n.role == "master"), None)
+            raise RuntimeError(
+                "No nodes configured for bare-metal provisioning"
+            )
+        master = next(
+            (n for n in self.config.nodes if n.role == "master"),
+            None,
+        )
         if not master:
             raise RuntimeError("No master node configured")
-        workers = [n for n in self.config.nodes if n.role == "worker"]
+        workers = [
+            n for n in self.config.nodes if n.role == "worker"
+        ]
         await self._install_k3s(master, workers)
 
     async def _provision_terraform(self):
@@ -73,18 +96,29 @@ class Provisioner:
         tf_file = tf_dir / "main.tf"
         tf_file.write_text(tf_config)
         proc = await asyncio.create_subprocess_exec(
-            "terraform", "-chdir=" + str(tf_dir), "init",
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            "terraform",
+            f"-chdir={tf_dir}",
+            "init",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
         await proc.communicate()
         proc = await asyncio.create_subprocess_exec(
-            "terraform", "-chdir=" + str(tf_dir), "apply", "-auto-approve",
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            "terraform",
+            f"-chdir={tf_dir}",
+            "apply",
+            "-auto-approve",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
         await proc.communicate()
         proc = await asyncio.create_subprocess_exec(
-            "terraform", "-chdir=" + str(tf_dir), "output", "-json",
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            "terraform",
+            f"-chdir={tf_dir}",
+            "output",
+            "-json",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
         stdout, _ = await proc.communicate()
         outputs = json.loads(stdout)
@@ -94,58 +128,105 @@ class Provisioner:
         nodes += [Node(ip, role="worker") for ip in worker_ips]
         if nodes:
             self.config.nodes = nodes
-            master = next(n for n in nodes if n.role == "master")
-            workers = [n for n in nodes if n.role == "worker"]
+            master = next(
+                n for n in nodes if n.role == "master"
+            )
+            workers = [
+                n for n in nodes if n.role == "worker"
+            ]
             await self._install_k3s(master, workers)
 
     def _generate_terraform_config(self) -> str:
-        return f"""# Auto-generated Terraform config for {self.config.name}
-# Provider: {self.config.provider}
-"""
+        return (
+            f"# Auto-generated Terraform config for"
+            f" {self.config.name}\n"
+            f"# Provider: {self.config.provider}\n"
+        )
 
-    async def _install_k3s(self, master: Node, workers: list[Node]):
+    async def _install_k3s(
+        self, master: Node, workers: list[Node]
+    ):
         version = self.config.k3s_version
-        logger.info(f"Installing K3s master on {master.host}")
-        rc, out, err = await self.run_ssh(
-            master.host,
-            f"curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={version} sh -",
+        logger.info("Installing K3s master on %s", master.host)
+        install_cmd = (
+            "curl -sfL https://get.k3s.io"
+            f" | INSTALL_K3S_VERSION={version} sh -"
+        )
+        rc, _out, err = await self.run_ssh(
+            master.host, install_cmd
         )
         if rc != 0:
-            raise RuntimeError(f"K3s master install failed: {err}")
-        rc, out, err = await self.run_ssh(master.host, "sudo cat /var/lib/rancher/k3s/server/node-token")
+            raise RuntimeError(
+                f"K3s master install failed: {err}"
+            )
+        token_cmd = (
+            "sudo cat /var/lib/rancher/k3s/server/node-token"
+        )
+        rc, out, _err = await self.run_ssh(
+            master.host, token_cmd
+        )
         token = out.strip()
-        rc, out, _ = await self.run_ssh(master.host, "sudo cat /etc/rancher/k3s/k3s.yaml")
+        rc, out, _ = await self.run_ssh(
+            master.host, "sudo cat /etc/rancher/k3s/k3s.yaml"
+        )
         kubeconfig = out.replace("127.0.0.1", master.host)
         Path("kubeconfig.yaml").write_text(kubeconfig)
-        os.environ["KUBECONFIG"] = str(Path("kubeconfig.yaml").absolute())
+        os.environ["KUBECONFIG"] = str(
+            Path("kubeconfig.yaml").absolute()
+        )
         for worker in workers:
-            logger.info(f"Installing K3s worker on {worker.host}")
-            rc, out, err = await self.run_ssh(
-                worker.host,
-                f"curl -sfL https://get.k3s.io | K3S_URL=https://{master.host}:6443 K3S_TOKEN={token} INSTALL_K3S_VERSION={version} sh -",
+            logger.info(
+                "Installing K3s worker on %s", worker.host
+            )
+            worker_cmd = (
+                "curl -sfL https://get.k3s.io"
+                f" | K3S_URL=https://{master.host}:6443"
+                f" K3S_TOKEN={token}"
+                f" INSTALL_K3S_VERSION={version} sh -"
+            )
+            rc, _out, err = await self.run_ssh(
+                worker.host, worker_cmd
             )
             if rc != 0:
-                logger.error(f"Worker {worker.host} install failed: {err}")
-        logger.info(f"Cluster {self.config.name} provisioned successfully")
+                logger.error(
+                    "Worker %s install failed: %s",
+                    worker.host,
+                    err,
+                )
+        logger.info(
+            "Cluster %s provisioned successfully",
+            self.config.name,
+        )
 
     async def destroy(self, cluster_name: str):
-        logger.info(f"Destroying cluster: {cluster_name}")
+        logger.info("Destroying cluster: %s", cluster_name)
         if self.config.provider == "bare-metal":
             for node in self.config.nodes:
-                await self.run_ssh(node.host, "sudo /usr/local/bin/k3s-uninstall.sh")
+                await self.run_ssh(
+                    node.host,
+                    "sudo /usr/local/bin/k3s-uninstall.sh",
+                )
         else:
             tf_dir = Path("./terraform")
             if tf_dir.exists():
                 proc = await asyncio.create_subprocess_exec(
-                    "terraform", "-chdir=" + str(tf_dir), "destroy", "-auto-approve",
+                    "terraform",
+                    f"-chdir={tf_dir}",
+                    "destroy",
+                    "-auto-approve",
                 )
                 await proc.communicate()
 
     async def status(self, cluster_name: str) -> dict:
         try:
             proc = await asyncio.create_subprocess_exec(
-                "kubectl", "get", "nodes", "-o", "json",
-                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+                "kubectl",
+                "get",
+                "nodes",
+                "-o",
+                "json",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
             stdout, _ = await proc.communicate()
             nodes = json.loads(stdout)
@@ -155,5 +236,11 @@ class Provisioner:
                 "node_count": len(nodes.get("items", [])),
             }
         except Exception as e:
-            logger.warning("Failed to get cluster status: %s", e)
-            return {"cluster": cluster_name, "status": "unknown", "node_count": 0}
+            logger.warning(
+                "Failed to get cluster status: %s", e
+            )
+            return {
+                "cluster": cluster_name,
+                "status": "unknown",
+                "node_count": 0,
+            }

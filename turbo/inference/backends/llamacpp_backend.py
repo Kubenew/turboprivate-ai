@@ -15,7 +15,11 @@ class LlamaCppBackend:
                 "llama-cpp-python not installed. Run: pip install llama-cpp-python"
             )
 
-        model_path = str(self.config.model_path) if self.config.model_path else self.config.model_name
+        model_path = (
+            str(self.config.model_path)
+            if self.config.model_path
+            else self.config.model_name
+        )
         n_gpu_layers = -1 if self.config.gpu_type != "cpu" else 0
 
         self.llm = Llama(

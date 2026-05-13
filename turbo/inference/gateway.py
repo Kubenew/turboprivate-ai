@@ -38,18 +38,24 @@ class InferenceGateway:
             return None
         return min(healthy, key=lambda b: b.score())
 
-    async def forward(self, backend: Backend, model: str, payload: dict) -> dict:
+    async def forward(
+        self, backend: Backend, model: str, payload: dict
+    ) -> dict:
         if self._client is None:
             self._client = httpx.AsyncClient(timeout=60.0)
         backend.active_requests += 1
         t0 = time.time()
         try:
-            resp = await self._client.post(f"{backend.url}/infer/{model}", json=payload)
+            resp = await self._client.post(
+                f"{backend.url}/infer/{model}", json=payload
+            )
             resp.raise_for_status()
             backend.last_latency_ms = (time.time() - t0) * 1000
             return resp.json()
         except Exception as e:
-            logger.warning("Forward request to %s failed: %s", backend.url, e)
+            logger.warning(
+                "Forward request to %s failed: %s", backend.url, e
+            )
             backend.last_latency_ms = (time.time() - t0) * 1000
             backend.healthy = False
             raise
@@ -57,34 +63,55 @@ class InferenceGateway:
             backend.active_requests -= 1
             backend.last_seen = time.time()
 
-    async def health_check(self, interval: int = 5, timeout: int = 2, path: str = "/health"):
+    async def health_check(
+        self,
+        interval: int = 5,
+        timeout: int = 2,
+        path: str = "/health",
+    ):
         if self._client is None:
             self._client = httpx.AsyncClient(timeout=timeout)
         while True:
             try:
-                all_backends = [b for pool in self.pools.values() for b in pool]
+                all_backends = [
+                    b for pool in self.pools.values() for b in pool
+                ]
                 results = await asyncio.gather(
-                    *[self._ping(b, path, timeout) for b in all_backends],
+                    *[self._ping(b, path) for b in all_backends],
                     return_exceptions=True,
                 )
                 for b, ok in zip(all_backends, results):
-                    b.healthy = bool(ok) and ok is not True
+                    b.healthy = ok is True
                 healthy = sum(1 for b in all_backends if b.healthy)
-                logger.info(f"Health check: {healthy}/{len(all_backends)} backends healthy")
+                total = len(all_backends)
+                logger.info(
+                    "Health check: %d/%d backends healthy",
+                    healthy,
+                    total,
+                )
             except Exception as e:
                 logger.error("Health check error: %s", e)
             await asyncio.sleep(interval)
 
-    async def _ping(self, backend: Backend, path: str, timeout: int) -> bool:
+    async def _ping(self, backend: Backend, path: str) -> bool:
         try:
             resp = await self._client.get(f"{backend.url}{path}")
             return resp.is_success
         except Exception as e:
-            logger.debug("Backend %s ping failed: %s", backend.url, e)
+            logger.debug(
+                "Backend %s ping failed: %s", backend.url, e
+            )
             return False
 
-    def start_health_checks(self, interval: int = 5, timeout: int = 2, path: str = "/health"):
-        self._health_task = asyncio.create_task(self.health_check(interval, timeout, path))
+    def start_health_checks(
+        self,
+        interval: int = 5,
+        timeout: int = 2,
+        path: str = "/health",
+    ):
+        self._health_task = asyncio.create_task(
+            self.health_check(interval, timeout, path)
+        )
 
     async def stop_health_checks(self):
         if self._health_task:

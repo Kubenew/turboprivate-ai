@@ -37,11 +37,16 @@ def pack_int4(values_int8: np.ndarray) -> np.ndarray:
     n = values_int8.size
     if n % 2 != 0:
         values_int8 = np.append(values_int8, np.int8(0))
-    packed = np.bitwise_or(values_int8[0::2].astype(np.uint8), values_int8[1::2].astype(np.uint8) << 4)
+    packed = np.bitwise_or(
+        values_int8[0::2].astype(np.uint8),
+        values_int8[1::2].astype(np.uint8) << 4,
+    )
     return packed
 
 
-def unpack_int4(packed_uint8: np.ndarray, length: int) -> np.ndarray:
+def unpack_int4(
+    packed_uint8: np.ndarray, length: int
+) -> np.ndarray:
     lo = (packed_uint8 & 0x0F).astype(np.int8)
     lo[lo > 7] -= 16
     hi = ((packed_uint8 >> 4) & 0x0F).astype(np.int8)
@@ -52,7 +57,13 @@ def unpack_int4(packed_uint8: np.ndarray, length: int) -> np.ndarray:
     return result
 
 
-def quantize_group_wise(W: np.ndarray, group_size: int, scales: np.ndarray, zero_points: np.ndarray | None, symmetric: bool = True) -> np.ndarray:
+def quantize_group_wise(
+    W: np.ndarray,
+    group_size: int,
+    scales: np.ndarray,
+    zero_points: np.ndarray | None,
+    symmetric: bool = True,
+) -> np.ndarray:
     out_dim, in_dim = W.shape
     n_groups = in_dim // group_size
     rows = []
@@ -71,7 +82,12 @@ def quantize_group_wise(W: np.ndarray, group_size: int, scales: np.ndarray, zero
     return np.stack(rows)
 
 
-def _dequantize_zero_point(W_quantized: np.ndarray, scales: np.ndarray, zero_points: np.ndarray, group_size: int) -> np.ndarray:
+def _dequantize_zero_point(
+    W_quantized: np.ndarray,
+    scales: np.ndarray,
+    zero_points: np.ndarray,
+    group_size: int,
+) -> np.ndarray:
     out_dim, _ = W_quantized.shape
     n_groups = scales.shape[1]
     rows = []
@@ -92,7 +108,13 @@ def _dequantize_zero_point(W_quantized: np.ndarray, scales: np.ndarray, zero_poi
     return np.stack(rows)
 
 
-def dequantize_group_wise(W_quantized: np.ndarray, scales: np.ndarray, zero_points: np.ndarray | None, group_size: int, symmetric: bool = True) -> np.ndarray:
+def dequantize_group_wise(
+    W_quantized: np.ndarray,
+    scales: np.ndarray,
+    zero_points: np.ndarray | None,
+    group_size: int,
+    symmetric: bool = True,
+) -> np.ndarray:
     out_dim, _ = W_quantized.shape
     n_groups = scales.shape[1]
     rows = []
@@ -112,7 +134,11 @@ def dequantize_group_wise(W_quantized: np.ndarray, scales: np.ndarray, zero_poin
     return np.stack(rows)
 
 
-def compute_awq_scales(W: np.ndarray, activations: np.ndarray | None, group_size: int) -> np.ndarray:
+def compute_awq_scales(
+    W: np.ndarray,
+    activations: np.ndarray | None,
+    group_size: int,
+) -> np.ndarray:
     out_dim, in_dim = W.shape
     n_groups = in_dim // group_size
     scales = np.ones((out_dim, n_groups), dtype=np.float16)
@@ -121,13 +147,20 @@ def compute_awq_scales(W: np.ndarray, activations: np.ndarray | None, group_size
             start = g * group_size
             end = start + group_size
             block = W[r, start:end]
-            aw = activations[start:end] if activations is not None else np.ones(group_size)
-            s = np.sqrt(np.mean(block ** 2) / np.mean(aw ** 2 + 1e-10))
+            if activations is not None:
+                aw = activations[start:end]
+            else:
+                aw = np.ones(group_size)
+            s = np.sqrt(
+                np.mean(block ** 2) / np.mean(aw ** 2 + 1e-10)
+            )
             scales[r, g] = float(s)
     return scales
 
 
-def identify_outliers(W: np.ndarray, ratio: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def identify_outliers(
+    W: np.ndarray, ratio: float
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     out_dim, in_dim = W.shape
     importance = np.mean(np.abs(W), axis=0)
     k = max(1, int(in_dim * ratio))
@@ -138,7 +171,9 @@ def identify_outliers(W: np.ndarray, ratio: float) -> tuple[np.ndarray, np.ndarr
     return mask, indices, channels
 
 
-def svd_low_rank_correction(W_residual: np.ndarray, rank: int) -> tuple[np.ndarray | None, np.ndarray | None]:
+def svd_low_rank_correction(
+    W_residual: np.ndarray, rank: int
+) -> tuple[np.ndarray | None, np.ndarray | None]:
     if rank <= 0:
         return None, None
     U, s, Vt = np.linalg.svd(W_residual, full_matrices=False)
@@ -148,7 +183,11 @@ def svd_low_rank_correction(W_residual: np.ndarray, rank: int) -> tuple[np.ndarr
     return U_corr.astype(np.float16), V_corr.astype(np.float16)
 
 
-def turboquant_v3_compress(W: np.ndarray, config: QuantConfig, activations: np.ndarray | None = None) -> CompressedWeights:
+def turboquant_v3_compress(
+    W: np.ndarray,
+    config: QuantConfig,
+    activations: np.ndarray | None = None,
+) -> CompressedWeights:
     out_dim, in_dim = W.shape
     W = W.astype(np.float32)
 
@@ -173,7 +212,11 @@ def turboquant_v3_compress(W: np.ndarray, config: QuantConfig, activations: np.n
 
     n_groups = in_dim // config.group_size
     scales = np.zeros((out_dim, n_groups), dtype=np.float16)
-    zero_points = np.zeros((out_dim, n_groups), dtype=np.float16) if config.zero_point else None
+    zero_points = (
+        np.zeros((out_dim, n_groups), dtype=np.float16)
+        if config.zero_point
+        else None
+    )
     rows = []
 
     for r in range(out_dim):
@@ -185,14 +228,17 @@ def turboquant_v3_compress(W: np.ndarray, config: QuantConfig, activations: np.n
             if config.zero_point:
                 block_min = float(block.min())
                 block_max = float(block.max())
-                s = (block_max - block_min) / 15.0 if block_max > block_min else 1.0
+                rng_val = block_max - block_min
+                s = rng_val / 15.0 if rng_val > 0 else 1.0
                 Z = -float(np.round(block_min / s))
                 zero_points[r, g] = Z
                 q = np.round(block / s + Z).astype(np.int8)
                 q = np.clip(q, 0, 15).astype(np.int8)
                 q = q - 8
             else:
-                abs_block = np.abs(block) * act_stats[start:end]
+                abs_block = (
+                    np.abs(block) * act_stats[start:end]
+                )
                 s = float(abs_block.max()) / 7.0
                 if s < 1e-10:
                     s = 1.0
@@ -204,12 +250,18 @@ def turboquant_v3_compress(W: np.ndarray, config: QuantConfig, activations: np.n
 
     packed = np.stack(rows)
     if config.zero_point:
-        W_q = _dequantize_zero_point(packed, scales, zero_points, config.group_size)
+        W_q = _dequantize_zero_point(
+            packed, scales, zero_points, config.group_size
+        )
     else:
-        W_q = dequantize_group_wise(packed, scales, zero_points, config.group_size)
+        W_q = dequantize_group_wise(
+            packed, scales, zero_points, config.group_size
+        )
     W_q[:, protected_mask] = protected_channels
     residual = W - W_q
-    svd_u, svd_v = svd_low_rank_correction(residual, config.rank)
+    svd_u, svd_v = svd_low_rank_correction(
+        residual, config.rank
+    )
 
     return CompressedWeights(
         packed_int4=packed,
@@ -226,12 +278,27 @@ def turboquant_v3_compress(W: np.ndarray, config: QuantConfig, activations: np.n
     )
 
 
-def turboquant_v3_decompress(comp: CompressedWeights) -> np.ndarray:
+def turboquant_v3_decompress(
+    comp: CompressedWeights,
+) -> np.ndarray:
     if comp.zero_points is not None:
-        W = _dequantize_zero_point(comp.packed_int4, comp.scales, comp.zero_points, comp.group_size)
+        W = _dequantize_zero_point(
+            comp.packed_int4,
+            comp.scales,
+            comp.zero_points,
+            comp.group_size,
+        )
     else:
-        W = dequantize_group_wise(comp.packed_int4, comp.scales, None, comp.group_size)
-    if comp.protected_channels is not None and comp.protected_indices is not None:
+        W = dequantize_group_wise(
+            comp.packed_int4,
+            comp.scales,
+            None,
+            comp.group_size,
+        )
+    if (
+        comp.protected_channels is not None
+        and comp.protected_indices is not None
+    ):
         W[:, comp.protected_indices] = comp.protected_channels
     if comp.svd_u is not None and comp.svd_v is not None:
         W += comp.svd_u @ comp.svd_v.T
@@ -239,7 +306,11 @@ def turboquant_v3_decompress(comp: CompressedWeights) -> np.ndarray:
 
 
 class Quantizer:
-    def __init__(self, method: Literal["awq", "gptq", "int4-group"] = "awq", bits: int = 4):
+    def __init__(
+        self,
+        method: Literal["awq", "gptq", "int4-group"] = "awq",
+        bits: int = 4,
+    ):
         self.method = method
         self.bits = bits
         self.config = QuantConfig()
@@ -253,28 +324,46 @@ class Quantizer:
         else:
             await self._group_quantize(model_name, output_path)
 
-    async def _awq_quantize(self, model_name: str, output_path: Path):
+    async def _awq_quantize(
+        self, model_name: str, output_path: Path
+    ):
         import torch
-        from transformers import AutoModelForCausalLM, AutoTokenizer
-        model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype="auto")
+        from transformers import (
+            AutoModelForCausalLM,
+            AutoTokenizer,
+        )
+
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, torch_dtype="auto"
+        )
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        for name, module in model.named_modules():
-            if hasattr(module, "weight") and module.weight.dim() == 2:
+        for _name, module in model.named_modules():
+            if (
+                hasattr(module, "weight")
+                and module.weight.dim() == 2
+            ):
                 W = module.weight.detach().cpu().numpy()
                 comp = turboquant_v3_compress(W, self.config)
                 W_q = turboquant_v3_decompress(comp)
-                module.weight.data = torch.from_numpy(W_q).to(module.weight.device)
+                module.weight.data = torch.from_numpy(W_q).to(
+                    module.weight.device
+                )
         model.save_pretrained(output_path)
         tokenizer.save_pretrained(output_path)
 
-    async def _gptq_quantize(self, model_name: str, output_path: Path):
+    async def _gptq_quantize(
+        self, model_name: str, output_path: Path
+    ):
         pass
 
-    async def _group_quantize(self, model_name: str, output_path: Path):
+    async def _group_quantize(
+        self, model_name: str, output_path: Path
+    ):
         pass
 
     async def benchmark(self, model_path: Path) -> dict:
         import time
+
         W = np.random.randn(4096, 4096).astype(np.float32)
         t0 = time.time()
         comp = turboquant_v3_compress(W, self.config)

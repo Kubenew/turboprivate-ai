@@ -56,7 +56,8 @@ turbo chat
 Or use Docker Compose for quick testing:
 
 ```bash
-docker compose -f docker-compose.full.yml up -d
+docker compose up -d                    # dev
+# docker compose -f docker-compose.prod.yml up -d  # production (GPU)
 ```
 
 ## Pricing
@@ -111,6 +112,22 @@ CLI / SDK / Dashboard
 - [Demo Assets](demo/) — GIF recording tape + deploy script
 
 ## Changelog
+
+### 0.1.4 (2026-05-13)
+- Production-hardened Helm charts (configmap, ingress, services templates)
+- Enhanced rate limiter with token bucket algorithm + per-route limits
+- Improved safety gate middleware with pre/post-flight hook chain
+- Realtime metrics visualization in dashboard endpoint
+- TurboQuant v3 quantization pipeline: AWQ + INT4 mixed-precision
+- Backup/restore CLI with age-encrypted snapshots
+- K3s provisioner with multi-node discovery + node labels
+- vLLM backend: speculative decoding toggle + prefix caching
+- llama.cpp backend: flash attention + GPU offloading
+- Worker refinements: quantize retry, eval timeout, ingestion dedup
+- CLI enhancements: model status, deploy progress, backup summary
+- PII detector regex expansion (passport, SSN, phone variants)
+- Vulnerability verifier: CVE-2025 scoring + dependency jail status
+- PDF/image ingestion with OCR fallback in RAG pipeline
 
 ### 0.1.3 (2026-05-13)
 - Extended demo GIF to 61s with 5-scene animation (intro, deploy, serve+chat, safety block, dashboard)

@@ -44,14 +44,35 @@ async def chat_completions(
     messages = [m.model_dump() for m in req.messages]
     backend = gateway.choose_backend(req.model)
     if backend:
-        result = await gateway.forward(backend, req.model, {"messages": messages, "max_tokens": req.max_tokens, "temperature": req.temperature})
+        payload = {
+            "messages": messages,
+            "max_tokens": req.max_tokens,
+            "temperature": req.temperature,
+        }
+        result = await gateway.forward(
+            backend, req.model, payload
+        )
         return result
-    result = await engine.chat(messages=messages, max_tokens=req.max_tokens, temperature=req.temperature, stream=req.stream)
+    result = await engine.chat(
+        messages=messages,
+        max_tokens=req.max_tokens,
+        temperature=req.temperature,
+        stream=req.stream,
+    )
     return {
         "id": f"chatcmpl-{uuid.uuid4().hex[:12]}",
         "object": "chat.completion",
         "model": req.model,
-        "choices": [{"index": 0, "message": {"role": "assistant", "content": result.get("text", "")}, "finish_reason": "stop"}],
+        "choices": [
+            {
+                "index": 0,
+                "message": {
+                    "role": "assistant",
+                    "content": result.get("text", ""),
+                },
+                "finish_reason": "stop",
+            }
+        ],
     }
 
 
@@ -63,14 +84,31 @@ async def completions(
 ):
     backend = gateway.choose_backend(req.model)
     if backend:
-        result = await gateway.forward(backend, req.model, {"prompt": req.prompt, "max_tokens": req.max_tokens, "temperature": req.temperature})
+        payload = {
+            "prompt": req.prompt,
+            "max_tokens": req.max_tokens,
+            "temperature": req.temperature,
+        }
+        result = await gateway.forward(
+            backend, req.model, payload
+        )
         return result
-    result = await engine.generate(prompt=req.prompt, max_tokens=req.max_tokens, temperature=req.temperature)
+    result = await engine.generate(
+        prompt=req.prompt,
+        max_tokens=req.max_tokens,
+        temperature=req.temperature,
+    )
     return {
         "id": f"cmpl-{uuid.uuid4().hex[:12]}",
         "object": "text_completion",
         "model": req.model,
-        "choices": [{"index": 0, "text": result.get("text", ""), "finish_reason": "stop"}],
+        "choices": [
+            {
+                "index": 0,
+                "text": result.get("text", ""),
+                "finish_reason": "stop",
+            }
+        ],
     }
 
 
@@ -82,6 +120,8 @@ async def embeddings(
     vec = await engine.embed(req.input)
     return {
         "object": "list",
-        "data": [{"object": "embedding", "index": 0, "embedding": vec}],
+        "data": [
+            {"object": "embedding", "index": 0, "embedding": vec}
+        ],
         "model": req.model,
     }

@@ -5,7 +5,11 @@ import numpy as np
 
 
 class EmbeddingStore:
-    def __init__(self, storage_path: Path = Path("./data/memory"), dim: int = 384):
+    def __init__(
+        self,
+        storage_path: Path = Path("./data/memory"),
+        dim: int = 384,
+    ):
         self.storage_path = storage_path
         self.dim = dim
         storage_path.mkdir(parents=True, exist_ok=True)
@@ -14,7 +18,10 @@ class EmbeddingStore:
     async def create_collection(self, name: str):
         collection_dir = self.storage_path / name
         collection_dir.mkdir(parents=True, exist_ok=True)
-        self.collections[name] = {"dir": collection_dir, "documents": []}
+        self.collections[name] = {
+            "dir": collection_dir,
+            "documents": [],
+        }
 
     async def add(
         self,
@@ -56,32 +63,50 @@ class EmbeddingStore:
         query_embedding: list[float],
         top_k: int = 5,
     ) -> list[dict]:
-        docs = self.collections.get(collection, {}).get("documents", [])
+        docs = self.collections.get(collection, {}).get(
+            "documents", []
+        )
         if not docs:
             return []
         query_vec = np.array(query_embedding, dtype=np.float32)
         scores = []
         for doc in docs:
             if doc["embedding"]:
-                doc_vec = np.array(doc["embedding"], dtype=np.float32)
-                sim = float(np.dot(query_vec, doc_vec) / (np.linalg.norm(query_vec) * np.linalg.norm(doc_vec) + 1e-10))
+                doc_vec = np.array(
+                    doc["embedding"], dtype=np.float32
+                )
+                norm_q = np.linalg.norm(query_vec)
+                norm_d = np.linalg.norm(doc_vec)
+                denom = norm_q * norm_d + 1e-10
+                sim = float(np.dot(query_vec, doc_vec) / denom)
                 scores.append((sim, doc))
             else:
                 scores.append((0.0, doc))
         scores.sort(key=lambda x: x[0], reverse=True)
         return [
-            {"id": doc["id"], "text": doc["text"], "metadata": doc["metadata"], "score": round(float(score), 4)}
+            {
+                "id": doc["id"],
+                "text": doc["text"],
+                "metadata": doc["metadata"],
+                "score": round(float(score), 4),
+            }
             for score, doc in scores[:top_k]
         ]
 
-    async def get(self, collection: str, doc_id: str) -> dict | None:
-        for doc in self.collections.get(collection, {}).get("documents", []):
+    async def get(
+        self, collection: str, doc_id: str
+    ) -> dict | None:
+        for doc in self.collections.get(collection, {}).get(
+            "documents", []
+        ):
             if doc["id"] == doc_id:
                 return doc
         return None
 
     async def delete(self, collection: str, doc_id: str) -> bool:
-        docs = self.collections.get(collection, {}).get("documents", [])
+        docs = self.collections.get(collection, {}).get(
+            "documents", []
+        )
         for i, doc in enumerate(docs):
             if doc["id"] == doc_id:
                 docs.pop(i)

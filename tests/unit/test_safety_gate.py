@@ -125,5 +125,7 @@ async def test_composite_reward_safety_fail():
 @pytest.mark.asyncio
 async def test_vulnerability_scanner():
     v = VulnerabilityScannerVerifier()
-    result = await v.verify(response="analysis ```json {\"vulnerabilities\": [{\"type\": \"xss\"}]} ```")
+    result = await v.verify(
+        response='analysis ```json {"vulnerabilities": [{"type": "xss"}]} ```'
+    )
     assert result["verifier"] == "vulnerability_scanner"

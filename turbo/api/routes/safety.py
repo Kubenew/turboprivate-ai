@@ -8,10 +8,14 @@ router = APIRouter()
 
 
 @router.get("/safety/status")
-async def safety_status(gate: SafetyGate = Depends(get_safety_gate)):
+async def safety_status(
+    gate: SafetyGate = Depends(get_safety_gate),
+):
     return {
         "pre_flight": [v.name for v in gate.pre_flight_verifiers],
-        "post_flight": [v.name for v in gate.post_flight_verifiers],
+        "post_flight": [
+            v.name for v in gate.post_flight_verifiers
+        ],
         "pre_flight_count": len(gate.pre_flight_verifiers),
         "post_flight_count": len(gate.post_flight_verifiers),
     }
@@ -31,7 +35,13 @@ async def audit_log(
     blocked_only: bool = False,
     audit: AuditTrail = Depends(get_audit_trail),
 ):
-    entries = await audit.query(start=start, end=end, limit=limit, action=action, blocked_only=blocked_only)
+    entries = await audit.query(
+        start=start,
+        end=end,
+        limit=limit,
+        action=action,
+        blocked_only=blocked_only,
+    )
     stats = await audit.stats()
     return {"entries": entries, "stats": stats}
 
@@ -43,7 +53,20 @@ async def safety_check(
     gate: SafetyGate = Depends(get_safety_gate),
     audit: AuditTrail = Depends(get_audit_trail),
 ):
-    pre = await gate.check_pre_flight(prompt) if prompt else {"allowed": True}
-    post = await gate.check_post_flight(prompt, response) if response else {"allowed": True}
-    await audit.log("safety_check", {"pre_flight": pre, "post_flight": post}, prompt=prompt, response=response)
+    pre = (
+        await gate.check_pre_flight(prompt)
+        if prompt
+        else {"allowed": True}
+    )
+    post = (
+        await gate.check_post_flight(prompt, response)
+        if response
+        else {"allowed": True}
+    )
+    await audit.log(
+        "safety_check",
+        {"pre_flight": pre, "post_flight": post},
+        prompt=prompt,
+        response=response,
+    )
     return {"pre_flight": pre, "post_flight": post}

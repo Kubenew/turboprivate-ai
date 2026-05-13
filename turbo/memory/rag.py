@@ -3,7 +3,9 @@ from pathlib import Path
 from turbo.memory.store import EmbeddingStore
 
 
-def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> list[str]:
+def chunk_text(
+    text: str, chunk_size: int = 500, overlap: int = 50
+) -> list[str]:
     if chunk_size <= 0:
         raise ValueError("chunk_size must be positive")
     if overlap < 0:
@@ -38,7 +40,9 @@ class RAGPipeline:
         if self._embedder is None:
             try:
                 from sentence_transformers import SentenceTransformer
-                self._embedder = SentenceTransformer(self.embedding_model)
+                self._embedder = SentenceTransformer(
+                    self.embedding_model
+                )
             except ImportError:
                 pass
         return self._embedder
@@ -50,16 +54,25 @@ class RAGPipeline:
         source: str = "text",
         metadata: dict | None = None,
     ) -> list[str]:
-        chunks = chunk_text(text, self.chunk_size, self.chunk_overlap)
+        chunks = chunk_text(
+            text, self.chunk_size, self.chunk_overlap
+        )
         embedder = self._get_embedder()
         embeddings = None
         if embedder:
             embeddings = embedder.encode(chunks).tolist()
         meta_list = []
         for i, chunk in enumerate(chunks):
-            m = {"source": source, "chunk_index": i, "total_chunks": len(chunks), **(metadata or {})}
+            m = {
+                "source": source,
+                "chunk_index": i,
+                "total_chunks": len(chunks),
+                **(metadata or {}),
+            }
             meta_list.append(m)
-        return await self.store.add_batch(collection, chunks, embeddings, meta_list)
+        return await self.store.add_batch(
+            collection, chunks, embeddings, meta_list
+        )
 
     async def ingest_file(
         self,
@@ -70,8 +83,17 @@ class RAGPipeline:
         from turbo.memory.parser import DocumentParser
         parser = DocumentParser()
         text = await parser.parse(file_path)
-        file_meta = {"filename": file_path.name, "path": str(file_path), **(metadata or {})}
-        return await self.ingest_text(text, collection, source=str(file_path), metadata=file_meta)
+        file_meta = {
+            "filename": file_path.name,
+            "path": str(file_path),
+            **(metadata or {}),
+        }
+        return await self.ingest_text(
+            text,
+            collection,
+            source=str(file_path),
+            metadata=file_meta,
+        )
 
     async def query(
         self,
@@ -84,7 +106,9 @@ class RAGPipeline:
             query_vec = embedder.encode([question])[0].tolist()
         else:
             query_vec = [0.0] * 384
-        return await self.store.search(collection, query_vec, top_k)
+        return await self.store.search(
+            collection, query_vec, top_k
+        )
 
     async def augment(
         self,
@@ -94,7 +118,12 @@ class RAGPipeline:
         system_prompt: str | None = None,
     ) -> str:
         docs = await self.query(question, collection, top_k)
-        context = "\n\n".join(f"---\n{d['text']}" for d in docs)
+        context = "\n\n".join(
+            f"---\n{d['text']}" for d in docs
+        )
         if system_prompt:
-            return f"{system_prompt}\n\nContext:\n{context}\n\nQuestion: {question}"
+            return (
+                f"{system_prompt}\n\nContext:\n{context}"
+                f"\n\nQuestion: {question}"
+            )
         return f"Context:\n{context}\n\nQuestion: {question}"

@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-api
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: turboprivate-api
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.api.port }}
+      targetPort: {{ .Values.api.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app: turboprivate-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-inference
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: turboprivate-inference
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8001
+      targetPort: 8001
+      protocol: TCP
+      name: http
+  selector:
+    app: turboprivate-inference
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-redis
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: turboprivate-redis
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: 6379
+      protocol: TCP
+      name: redis
+  selector:
+    app: turboprivate-redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-postgresql
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: turboprivate-postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+      name: postgres
+  selector:
+    app: turboprivate-postgresql

@@ -1,6 +1,6 @@
 import json
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -19,20 +19,23 @@ class AuditTrail:
         user_id: str | None = None,
         model: str = "",
     ):
+        now = datetime.now(UTC)
         entry = {
             "id": str(uuid.uuid4()),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": now.isoformat(),
             "action": action,
             "tenant": tenant,
             "user_id": user_id,
             "model": model,
             "prompt_preview": prompt[:200] if prompt else "",
             "response_preview": response[:200] if response else "",
-            "allowed": result.get("allowed", result.get("passed", True)),
+            "allowed": result.get(
+                "allowed", result.get("passed", True)
+            ),
             "reason": result.get("reason"),
             "result": result,
         }
-        date = datetime.utcnow().strftime("%Y-%m-%d")
+        date = now.strftime("%Y-%m-%d")
         log_file = self.storage_path / f"{date}.jsonl"
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry) + "\n")

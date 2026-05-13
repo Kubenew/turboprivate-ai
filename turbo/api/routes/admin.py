@@ -15,17 +15,28 @@ async def dashboard(gateway=Depends(get_inference_gateway)):
         "latency_p50": 0,
         "latency_p95": 0,
         "latency_p99": 0,
-        "models": [{"name": m, "requests": 0, "latency": 0} for m in models],
+        "models": [
+            {"name": m, "requests": 0, "latency": 0}
+            for m in models
+        ],
         "active_models": len(models),
     }
 
 
 @router.get("/admin/governance/approvals")
-async def approval_queue(workflow: ApprovalWorkflow = Depends(get_approval_workflow)):
-    return {"pending": workflow.pending, "total": len(workflow.pending)}
+async def approval_queue(
+    workflow: ApprovalWorkflow = Depends(get_approval_workflow),
+):
+    return {
+        "pending": workflow.pending,
+        "total": len(workflow.pending),
+    }
 
 
 @router.post("/admin/governance/approve/{request_id}")
-async def approve_request(request_id: int, workflow: ApprovalWorkflow = Depends(get_approval_workflow)):
+async def approve_request(
+    request_id: int,
+    workflow: ApprovalWorkflow = Depends(get_approval_workflow),
+):
     await workflow.approve(request_id)
     return {"status": "approved", "id": request_id}

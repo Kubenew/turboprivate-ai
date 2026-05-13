@@ -36,10 +36,10 @@ def quantize(name: str, bits: int, method: str):
     click.echo(f"Quantizing {name} to INT{bits} via {method}...")
 
 
-@model.command()
+@model.command("serve")
 @click.argument("name")
 @click.option("--replicas", default=1, help="Number of replicas")
-def serve(name: str, replicas: int):
+def model_serve(name: str, replicas: int):
     click.echo(f"Serving model {name} with {replicas} replicas...")
 
 
@@ -243,7 +243,6 @@ def backups():
 @click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
 def doctor(verbose: bool):
     """Check system health and dependencies."""
-    import os
     import shutil
     import subprocess
     import sys
@@ -295,12 +294,14 @@ def doctor(verbose: bool):
     try:
         import psutil
         mem = psutil.virtual_memory()
-        click.echo(f"{'Memory':>20}  {ok(f'{mem.used / 1e9:.1f} / {mem.total / 1e9:.1f} GB ({mem.percent}%)')}")
+        mem_str = f"{mem.used / 1e9:.1f} / {mem.total / 1e9:.1f} GB ({mem.percent}%)"
+        click.echo(f"{'Memory':>20}  {ok(mem_str)}")
         cpu_count = psutil.cpu_count()
-        cpu_percent = psutil.cpu_percent(interval=0.5)
-        click.echo(f"{'CPU':>20}  {ok(f'{cpu_count} cores ({cpu_percent}% used)')}")
+        cpu_pct = psutil.cpu_percent(interval=0.5)
+        click.echo(f"{'CPU':>20}  {ok(f'{cpu_count} cores ({cpu_pct}%)')}")
         disk = psutil.disk_usage("/")
-        click.echo(f"{'Disk':>20}  {ok(f'{disk.free / 1e9:.1f} GB free of {disk.total / 1e9:.1f} GB')}")
+        disk_str = f"{disk.free / 1e9:.1f} GB free of {disk.total / 1e9:.1f} GB"
+        click.echo(f"{'Disk':>20}  {ok(disk_str)}")
     except ImportError:
         click.echo(f"{'Memory':>20}  {warn('psutil not installed')}")
 
@@ -312,8 +313,12 @@ def doctor(verbose: bool):
         path = shutil.which(tool)
         if path:
             try:
-                ver = subprocess.run([tool, "--version"], capture_output=True, text=True, timeout=5)
-                line = ver.stdout.split("\n")[0][:60] if ver.stdout else ver.stderr.split("\n")[0][:60]
+                ver = subprocess.run(
+                    [tool, "--version"],
+                    capture_output=True, text=True, timeout=5,
+                )
+                out = ver.stdout or ver.stderr
+                line = out.split("\n")[0][:60]
                 click.echo(f"{label:>20}  {ok(line.strip() or 'found')}")
             except Exception:
                 click.echo(f"{label:>20}  {ok('found')}")

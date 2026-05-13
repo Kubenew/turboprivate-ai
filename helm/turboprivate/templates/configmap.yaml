@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "turboprivate.fullname" . }}-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  TURBO_INFERENCE__BACKEND: "auto"
+  TURBO_INFERENCE__GPU_TYPE: "{{ .Values.inference.gpu.type }}"
+  TURBO_INFERENCE__MAX_BATCH_SIZE: "{{ .Values.inference.batching.max_batch_size }}"
+  TURBO_INFERENCE__MAX_WAIT_MS: "{{ .Values.inference.batching.max_wait_ms }}"
+  TURBO_SAFETY__ENABLED: "{{ .Values.safety.enabled }}"
+  TURBO_SAFETY__PRE_FLIGHT: "{{ .Values.safety.pre_flight }}"
+  TURBO_SAFETY__POST_FLIGHT: "{{ .Values.safety.post_flight }}"
+  TURBO_SAFETY__SANDBOX: "{{ .Values.safety.sandbox }}"
+  TURBO_MEMORY__ENABLED: "{{ .Values.memory.enabled }}"
+  TURBO_MEMORY__EMBEDDING_MODEL: "{{ .Values.memory.embedding_model }}"
+  TURBO_AUTH__ENABLED: "{{ .Values.auth.enabled }}"
+  TURBO_AUTH__PROVIDER: "{{ .Values.auth.provider }}"
+  TURBO_OBSERVABILITY__TRACING: "{{ .Values.monitoring.tracing }}"
+  TURBO_OBSERVABILITY__METRICS: "{{ .Values.monitoring.prometheus }}"
+  CELERY_BROKER_URL: "redis://{{ include "turboprivate.fullname" . }}-redis:6379/0"

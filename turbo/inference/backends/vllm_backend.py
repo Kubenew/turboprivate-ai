@@ -17,8 +17,14 @@ class VLLMBackend:
                 "vLLM not installed. Run: pip install turboprivate-ai[inference]"
             )
 
-        model_path = str(self.config.model_path) if self.config.model_path else self.config.model_name
-        dtype = self.config.dtype if self.config.dtype != "auto" else "auto"
+        model_path = (
+            str(self.config.model_path)
+            if self.config.model_path
+            else self.config.model_name
+        )
+        dtype = (
+            self.config.dtype if self.config.dtype != "auto" else "auto"
+        )
 
         self.llm = LLM(
             model=model_path,
@@ -57,9 +63,21 @@ class VLLMBackend:
         temperature: float = 0.7,
         stream: bool = False,
     ) -> dict:
-        from vllm.entrypoints.openai.api_server import build_prompt
-        prompt = build_prompt(messages)
-        return await self.generate(prompt, max_tokens, temperature, stream)
+        # Build prompt from messages using a standard chat template
+        parts = []
+        for msg in messages:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            if role == "system":
+                parts.append(f"<<SYS>>\n{content}\n<</SYS>>\n\n")
+            elif role == "user":
+                parts.append(f"[INST] {content} [/INST]")
+            elif role == "assistant":
+                parts.append(f"{content}")
+        prompt = "\n".join(parts)
+        return await self.generate(
+            prompt, max_tokens, temperature, stream=stream
+        )
 
     async def embed(self, text: str) -> list[float]:
         return []

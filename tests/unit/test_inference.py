@@ -27,7 +27,10 @@ def test_pack_unpack_roundtrip():
 
 def test_quantize_dequantize_symmetric():
     W = np.random.uniform(-1.0, 1.0, (16, 64)).astype(np.float32)
-    config = QuantConfig(group_size=32, activation_aware=False, outlier_keep_ratio=0.0, rank=0, zero_point=False)
+    config = QuantConfig(
+        group_size=32, activation_aware=False, outlier_keep_ratio=0.0,
+        rank=0, zero_point=False
+    )
     comp = turboquant_v3_compress(W, config)
     W_rec = turboquant_v3_decompress(comp)
     mse = np.mean((W - W_rec) ** 2)
@@ -35,7 +38,10 @@ def test_quantize_dequantize_symmetric():
 
 def test_quantize_dequantize_asymmetric():
     W = np.random.uniform(-0.5, 2.0, (16, 64)).astype(np.float32)
-    config = QuantConfig(group_size=32, activation_aware=False, outlier_keep_ratio=0.0, rank=0, zero_point=True)
+    config = QuantConfig(
+        group_size=32, activation_aware=False, outlier_keep_ratio=0.0,
+        rank=0, zero_point=True
+    )
     comp = turboquant_v3_compress(W, config)
     W_rec = turboquant_v3_decompress(comp)
     mse = np.mean((W - W_rec) ** 2)
