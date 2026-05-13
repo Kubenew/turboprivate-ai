@@ -178,6 +178,18 @@ def status(name: str):
 
 
 @cli.command()
+@click.option("--host", default="0.0.0.0", help="Bind address")
+@click.option("--port", default=8000, help="Port")
+@click.option("--reload", is_flag=True, help="Auto-reload on code changes")
+@click.option("--workers", default=1, help="Number of workers")
+def serve(host: str, port: int, reload: bool, workers: int):
+    """Start the API server."""
+    import uvicorn
+    click.echo(f"TurboPrivate AI server starting on {host}:{port}")
+    uvicorn.run("turbo.api.main:app", host=host, port=port, reload=reload, workers=workers)
+
+
+@cli.command()
 @click.argument("prompt")
 def chat(prompt: str):
     """Interactive chat with a model."""
@@ -228,39 +240,104 @@ def backups():
 
 
 @cli.command()
-def doctor():
+@click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
+def doctor(verbose: bool):
     """Check system health and dependencies."""
+    import os
+    import shutil
+    import subprocess
     import sys
 
-    click.echo("TurboPrivate AI System Check")
-    click.echo("=" * 40)
-    click.echo(f"Python: {sys.version.split()[0]}")
-    click.echo(f"Platform: {sys.platform}")
+    def ok(msg):
+        return click.style("[OK]", fg="green") + f" {msg}"
+
+    def warn(msg):
+        return click.style("[!!]", fg="yellow") + f" {msg}"
+
+    def fail(msg):
+        return click.style("[XX]", fg="red") + f" {msg}"
+
+    click.echo(click.style("TurboPrivate AI System Check", bold=True))
+    click.echo(click.style("=" * 40, dim=True))
+
+    click.echo(f"\n{'Platform':>20}  ", nl=False)
+    click.echo(ok(f"{sys.platform}, Python {sys.version.split()[0]}"))
+
+    click.echo(f"\n{click.style('RUNTIME', bold=True)}")
 
     try:
         import torch
-        click.echo(f"PyTorch: {torch.__version__}")
-        click.echo(f"CUDA available: {torch.cuda.is_available()}")
-        if torch.cuda.is_available():
-            click.echo(f"GPU: {torch.cuda.get_device_name(0)}")
-            click.echo(f"VRAM: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
+        cuda = torch.cuda.is_available()
+        if cuda:
+            name = torch.cuda.get_device_name(0)
+            mem = torch.cuda.get_device_properties(0).total_mem / 1e9
+            click.echo(f"{'PyTorch':>20}  {ok(f'{torch.__version__}')}")
+            click.echo(f"{'CUDA':>20}  {ok(f'{name} ({mem:.1f} GB VRAM)')}")
+        else:
+            click.echo(f"{'PyTorch':>20}  {ok(torch.__version__)}")
+            click.echo(f"{'CUDA':>20}  {warn('not available')}")
     except ImportError:
-        click.echo("PyTorch: not installed")
+        click.echo(f"{'PyTorch':>20}  {fail('not installed')}")
+        cuda = False
+
+    for mod, label in [("vllm", "vLLM"), ("transformers", "Transformers"),
+                        ("fastapi", "FastAPI"), ("uvicorn", "Uvicorn"),
+                        ("httpx", "HTTPX"), ("numpy", "NumPy")]:
+        try:
+            m = __import__(mod)
+            ver = getattr(m, "__version__", "")
+            click.echo(f"{label:>20}  {ok(ver)}")
+        except ImportError:
+            click.echo(f"{label:>20}  {warn('not installed')}")
+
+    click.echo(f"\n{click.style('SYSTEM', bold=True)}")
 
     try:
-        import vllm  # noqa: F401
-        click.echo("vLLM: installed")
+        import psutil
+        mem = psutil.virtual_memory()
+        click.echo(f"{'Memory':>20}  {ok(f'{mem.used / 1e9:.1f} / {mem.total / 1e9:.1f} GB ({mem.percent}%)')}")
+        cpu_count = psutil.cpu_count()
+        cpu_percent = psutil.cpu_percent(interval=0.5)
+        click.echo(f"{'CPU':>20}  {ok(f'{cpu_count} cores ({cpu_percent}% used)')}")
+        disk = psutil.disk_usage("/")
+        click.echo(f"{'Disk':>20}  {ok(f'{disk.free / 1e9:.1f} GB free of {disk.total / 1e9:.1f} GB')}")
     except ImportError:
-        click.echo("vLLM: not installed")
+        click.echo(f"{'Memory':>20}  {warn('psutil not installed')}")
 
-    try:
-        import fastapi  # noqa: F401
-        click.echo(f"FastAPI: {fastapi.__version__}")
-    except ImportError:
-        click.echo("FastAPI: not installed")
+    click.echo(f"\n{click.style('TOOLS', bold=True)}")
+
+    for tool, label in [("docker", "Docker"), ("kubectl", "kubectl"),
+                         ("helm", "Helm"), ("git", "Git"),
+                         ("curl", "curl"), ("age", "age")]:
+        path = shutil.which(tool)
+        if path:
+            try:
+                ver = subprocess.run([tool, "--version"], capture_output=True, text=True, timeout=5)
+                line = ver.stdout.split("\n")[0][:60] if ver.stdout else ver.stderr.split("\n")[0][:60]
+                click.echo(f"{label:>20}  {ok(line.strip() or 'found')}")
+            except Exception:
+                click.echo(f"{label:>20}  {ok('found')}")
+        else:
+            click.echo(f"{label:>20}  {warn('not found in PATH')}")
+
+    click.echo(f"\n{click.style('NETWORK', bold=True)}")
+
+    for host, label in [("pypi.org", "PyPI"), ("github.com", "GitHub"),
+                         ("huggingface.co", "HuggingFace")]:
+        code = subprocess.run(["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}",
+                               f"https://{host}", "--max-time", "5"],
+                              capture_output=True, text=True).stdout.strip()
+        if code and code.startswith(("2", "3")):
+            click.echo(f"{label:>20}  {ok('reachable')}")
+        else:
+            click.echo(f"{label:>20}  {warn('unreachable')}")
 
     click.echo("")
-    click.echo("System: " + ("✓ All good" if torch.cuda.is_available() else "⚠ No GPU detected"))
+    all_ok = cuda and all(shutil.which(t) for t in ("docker", "kubectl", "helm"))
+    if all_ok:
+        click.echo(ok("System ready for deployment"))
+    else:
+        click.echo(warn("System partially ready - see details above"))
 
 
 @cli.command()
