@@ -110,8 +110,16 @@ CLI / SDK / Dashboard
 - [API Reference](turbo/api/main.py) — FastAPI routes
 - [Safety Gate](turbo/safety/gate.py) — Verifier configuration
 - [Demo Assets](demo/) — GIF recording tape + deploy script
+- [SAP HANA RAG](examples/sap_hana_rag/) — LangChain + HANA vector store integration
+
+## Integrations
 
 ## Changelog
+
+### 0.1.5 (2026-05-16)
+- SAP HANA vector store integration example (LangChain + HanaDB + TurboPrivate AI RAG)
+- FastAPI RAG endpoint with similarity search + LLM generation
+- Document ingestion script with PDF/text support + HNSW index creation
 
 ### 0.1.4 (2026-05-13)
 - Production-hardened Helm charts (configmap, ingress, services templates)
