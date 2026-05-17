@@ -169,6 +169,12 @@ CLI / SDK / Dashboard
 
 ## 🔄 Changelog
 
+### 0.1.9 (2026-05-17)
+- Optimized SAP HANA Secure Connector: pre-compiled regex for high-throughput PII masking
+- Air-gapped installer support: `--offline` flag + local compose file detection
+- CI/CD security pipeline: automated SQL injection blocking tests
+- Performance tuning: vectorized masking hints, reduced regex overhead
+
 ### 0.1.8 (2026-05-17)
 - SAP HANA Secure RAG Connector: SQL injection guard, RLS mapping, PII masking
 - Hardware-aware installer: auto-detects NVIDIA / Apple Silicon / CPU

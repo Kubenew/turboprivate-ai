@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # TurboPrivate AI — 30-Second Installer
-# Detects hardware and spins up the optimal Docker Compose profile.
+# Supports online and offline (air-gapped) modes.
 
 set -e
 
@@ -10,6 +10,11 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
+
+OFFLINE=false
+if [[ "${1:-}" == "--offline" ]]; then
+    OFFLINE=true
+fi
 
 echo -e "${GREEN}╔══════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║  TurboPrivate AI — 30-Second Installer   ║${NC}"
@@ -53,10 +58,19 @@ else
     COMPOSE_FILE="docker-compose.cpu.yml"
 fi
 
-# Download compose file if not present
-if [ ! -f "$COMPOSE_FILE" ]; then
+# Check for local compose file or download
+if [ -f "$COMPOSE_FILE" ]; then
+    echo -e "${GREEN}✓ Found local $COMPOSE_FILE${NC}"
+elif [ "$OFFLINE" = true ]; then
+    echo -e "${RED}Error: $COMPOSE_FILE not found and --offline mode is active.${NC}"
+    echo -e "${YELLOW}Tip: Download the offline bundle from GitHub Releases.${NC}"
+    exit 1
+else
     echo -e "${YELLOW}📦 Downloading $COMPOSE_FILE...${NC}"
-    curl -sSL "https://raw.githubusercontent.com/Kubenew/turboprivate-ai/main/$COMPOSE_FILE" -o "$COMPOSE_FILE"
+    curl -sSL "https://raw.githubusercontent.com/Kubenew/turboprivate-ai/main/$COMPOSE_FILE" -o "$COMPOSE_FILE" || {
+        echo -e "${RED}Error: Failed to download compose file. Check internet connection or use --offline with local files.${NC}"
+        exit 1
+    }
 fi
 
 # Create .env if not present
