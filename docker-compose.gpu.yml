@@ -1,0 +1,67 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - TURBOPRIVATE_ENV=production
+      - TURBOPRIVATE_BACKEND=vllm
+      - TURBOPRIVATE_QUANT=int4
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+        limits:
+          memory: 24G
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=turboprivate
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-change_me}
+      - POSTGRES_DB=turboprivate
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  dashboard:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://api:8000
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "5174:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  postgres_data:
+  grafana_data:

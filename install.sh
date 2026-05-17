@@ -1,56 +1,89 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TurboPrivate AI — One-Click Installer
-# Usage: curl -fsSL https://get.turboprivate.ai | bash
+# TurboPrivate AI — 30-Second Installer
+# Detects hardware and spins up the optimal Docker Compose profile.
 
 set -e
 
-# Colors
-RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m'
 
 echo -e "${GREEN}╔══════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║  TurboPrivate AI — One-Click Installer   ║${NC}"
+echo -e "${GREEN}║  TurboPrivate AI — 30-Second Installer   ║${NC}"
 echo -e "${GREEN}╚══════════════════════════════════════════╝${NC}"
 echo
 
-# Check Python
-if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}Error: Python 3.11+ is required${NC}"
+# Check Docker
+if ! command -v docker &> /dev/null; then
+    echo -e "${RED}Error: Docker is required. Install Docker and try again.${NC}"
     exit 1
 fi
 
-PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-if [[ $(echo "$PYTHON_VERSION 3.11" | awk '{print ($1 >= $2)}') -ne 1 ]]; then
-    echo -e "${RED}Error: Python 3.11+ required (found $PYTHON_VERSION)${NC}"
+if ! command -v docker compose &> /dev/null; then
+    echo -e "${RED}Error: Docker Compose V2 is required.${NC}"
     exit 1
 fi
 
-echo -e "${YELLOW}✓ Python $PYTHON_VERSION detected${NC}"
+echo -e "${YELLOW}✓ Docker detected${NC}"
 
-# Check GPU (optional)
-if command -v nvidia-smi &> /dev/null; then
+# Detect Hardware
+OS_TYPE=$(uname -s)
+ARCH_TYPE=$(uname -m)
+COMPOSE_FILE="docker-compose.cpu.yml"
+
+echo -e "${YELLOW}🔍 Detecting hardware...${NC}"
+
+if [ "$OS_TYPE" = "Darwin" ]; then
+    if [ "$ARCH_TYPE" = "arm64" ]; then
+        echo -e "${GREEN}🍎 Apple Silicon detected — optimizing for CPU/Metal${NC}"
+        COMPOSE_FILE="docker-compose.mac.yml"
+    else
+        echo -e "${YELLOW}⚠️ Intel Mac detected — using CPU mode${NC}"
+        COMPOSE_FILE="docker-compose.cpu.yml"
+    fi
+elif command -v nvidia-smi &> /dev/null; then
     GPU=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)
-    echo -e "${YELLOW}✓ GPU detected: $GPU${NC}"
+    echo -e "${GREEN}🟢 NVIDIA GPU detected: $GPU${NC}"
+    COMPOSE_FILE="docker-compose.gpu.yml"
 else
-    echo -e "${YELLOW}⚠ No GPU detected — CPU mode will be used${NC}"
+    echo -e "${YELLOW}⚠️ No GPU detected — using CPU mode${NC}"
+    COMPOSE_FILE="docker-compose.cpu.yml"
 fi
 
-# Install
-echo
-echo -e "${GREEN}Installing TurboPrivate AI...${NC}"
-pip install turboprivate-ai[full] --quiet
+# Download compose file if not present
+if [ ! -f "$COMPOSE_FILE" ]; then
+    echo -e "${YELLOW}📦 Downloading $COMPOSE_FILE...${NC}"
+    curl -sSL "https://raw.githubusercontent.com/Kubenew/turboprivate-ai/main/$COMPOSE_FILE" -o "$COMPOSE_FILE"
+fi
+
+# Create .env if not present
+if [ ! -f ".env" ]; then
+    echo -e "${YELLOW}📝 Creating .env template...${NC}"
+    cat > .env << 'EOF'
+TURBOPRIVATE_ENV=production
+TURBOPRIVATE_LOG_LEVEL=info
+DB_PASSWORD=change_me_in_production
+GRAFANA_PASSWORD=admin
+EOF
+fi
+
+# Start stack
+echo -e "${GREEN} Starting TurboPrivate AI...${NC}"
+docker compose -f "$COMPOSE_FILE" up -d
 
 echo
 echo -e "${GREEN}✓ Installation complete!${NC}"
 echo
-echo -e "${YELLOW}Next steps:${NC}"
-echo "  1. turbo doctor          # Check system readiness"
-echo "  2. turbo deploy --provider bare-metal --gpu auto"
-echo "  3. turbo model serve meta-llama/Llama-3.1-8B --quant int4"
-echo "  4. turbo chat"
+echo -e "${YELLOW} API Endpoint: http://localhost:8000/v1${NC}"
+echo -e "${YELLOW}📊 Dashboard: http://localhost:5173${NC}"
+echo -e "${YELLOW}📈 Grafana: http://localhost:5174 (admin/admin)${NC}"
+echo
+echo -e "${GREEN}Test it:${NC}"
+echo '  curl http://localhost:8000/v1/chat/completions \\'
+echo '    -H "Content-Type: application/json" \\'
+echo '    -d '\''{"model": "llama-3.1-8b", "messages": [{"role": "user", "content": "Hello!"}]}'\'''
 echo
 echo -e "${GREEN}Docs: https://github.com/Kubenew/turboprivate-ai${NC}"

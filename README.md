@@ -32,11 +32,18 @@ turbo model serve meta-llama/Llama-3.1-8B --quant int4
 turbo chat
 ```
 
-### Docker Compose
+### Docker Compose (Hardware-Aware)
 ```bash
 git clone https://github.com/Kubenew/turboprivate-ai.git
 cd turboprivate-ai
-docker compose -f docker-compose.full.yml up -d
+
+# Auto-detects GPU / Apple Silicon / CPU
+curl -fsSL https://get.turboprivate.ai | bash
+
+# Or manually:
+docker compose -f docker-compose.gpu.yml up -d    # NVIDIA GPU
+docker compose -f docker-compose.mac.yml up -d     # Apple Silicon
+docker compose -f docker-compose.cpu.yml up -d     # CPU fallback
 ```
 
 ---
@@ -59,7 +66,21 @@ docker compose -f docker-compose.full.yml up -d
 
 ## 🏢 For Enterprises
 
-TurboPrivate AI is built for organizations that need **control, compliance, and cost efficiency**:
+TurboPrivate AI is the **Enterprise On-Premise AI Gateway** — a secure, compliant orchestration layer between your corporate data and open-source models.
+
+### What We Are
+- ✅ **Secure Wrapper**: Mythos Safe gate with 7 verifiers (injection, PII, toxicity, etc.)
+- ✅ **OpenAI Parity**: 100% compatible API — swap `base_url` and you're done
+- ✅ **SAP HANA Native**: Direct, secure RAG connector with SQL injection guard + RLS
+- ✅ **Audit & Compliance**: Immutable JSONL logs, GDPR/HIPAA/SOC 2 ready
+- ✅ **Hardware Agnostic**: GPU, Apple Silicon, or CPU — auto-optimized
+
+### What We Are Not
+- ❌ **Model Training**: We don't train models from scratch
+- ❌ **Custom UI**: We integrate Open WebUI / LibreChat instead of building our own
+- ❌ **Vector DB**: We connect to Qdrant, Milvus, pgvector — we don't replace them
+
+See [docs/ENTERPRISE.md](docs/ENTERPRISE.md) for architecture details.
 
 ### Security & Compliance
 - **Full data sovereignty**: Nothing leaves your infrastructure
@@ -147,6 +168,13 @@ CLI / SDK / Dashboard
 ---
 
 ## 🔄 Changelog
+
+### 0.1.8 (2026-05-17)
+- SAP HANA Secure RAG Connector: SQL injection guard, RLS mapping, PII masking
+- Hardware-aware installer: auto-detects NVIDIA / Apple Silicon / CPU
+- Docker Compose profiles: gpu.yml, mac.yml, cpu.yml for optimal deployment
+- README overhaul: "What We Are / Are Not" transparency, Enterprise Gateway positioning
+- Modular architecture: decoupled inference backends, plug-and-play vector DBs
 
 ### 0.1.7 (2026-05-17)
 - SECURITY.md with threat model, hardening guide, SBOM, responsible disclosure
