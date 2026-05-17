@@ -111,10 +111,15 @@ CLI / SDK / Dashboard
 - [Safety Gate](turbo/safety/gate.py) — Verifier configuration
 - [Demo Assets](demo/) — GIF recording tape + deploy script
 - [SAP HANA RAG](examples/sap_hana_rag/) — LangChain + HANA vector store integration
+- [SAP HANA Integration Guide](docs/SAP_HANA_INTEGRATION.md) — Cost calculator, security checklist, BYOM & compliance
 
 ## Integrations
 
 ## Changelog
+
+### 0.1.6 (2026-05-16)
+- SAP HANA integration guide: cost calculator, security checklist, BYOM in AI Core, Med/Fintech compliance
+- Enterprise hardening best practices for self-hosted LLM + vector database deployments
 
 ### 0.1.5 (2026-05-16)
 - SAP HANA vector store integration example (LangChain + HanaDB + TurboPrivate AI RAG)
