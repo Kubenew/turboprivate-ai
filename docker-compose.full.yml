@@ -1,0 +1,151 @@
+services:
+  # ── API Gateway ──
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - TURBOPRIVATE_ENV=production
+      - TURBOPRIVATE_LOG_LEVEL=info
+      - TURBOPRIVATE_SAFETY_ENABLED=true
+      - TURBOPRIVATE_RATE_LIMIT_ENABLED=true
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Inference Engine (GPU) ──
+  inference:
+    build: .
+    command: turbo model serve meta-llama/Llama-3.1-8B --quant int4 --port 8001
+    ports:
+      - "8001:8001"
+    environment:
+      - TURBOPRIVATE_ENV=production
+      - TURBOPRIVATE_BACKEND=vllm
+      - TURBOPRIVATE_QUANT=int4
+      - TURBOPRIVATE_MAX_MODEL_LEN=8192
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+        limits:
+          memory: 24G
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Worker (Celery) ─
+  worker:
+    build: .
+    command: celery -A worker.celery_app worker --loglevel=info
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+    restart: unless-stopped
+
+  # ── Redis (Broker + Cache) ──
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ── PostgreSQL (Metadata + Audit) ─
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=turboprivate
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-change_me_in_production}
+      - POSTGRES_DB=turboprivate
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U turboprivate"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ── Prometheus (Metrics) ──
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+
+  # ── Grafana (Dashboards) ──
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "5173:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # ── Dashboard (Web UI) ──
+  dashboard:
+    build: ./frontend
+    ports:
+      - "5174:80"
+    environment:
+      - VITE_API_URL=http://api:8000
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  postgres_data:
+  prometheus_data:
+  grafana_data:

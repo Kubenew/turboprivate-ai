@@ -1,0 +1,27 @@
+name: "🔒 Security Vulnerability"
+description: "Report a security vulnerability"
+title: "[Security]: "
+labels: ["security", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **⚠️ Please do NOT report security vulnerabilities through public GitHub issues.**
+        
+        Instead, email us at **security@turboprivate.ai** with details.
+        
+        See [SECURITY.md](https://github.com/Kubenew/turboprivate-ai/blob/main/SECURITY.md) for our security policy.
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Email
+      description: How can we reach you?
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Vulnerability Description
+      description: Brief description (do not include sensitive details)
+    validations:
+      required: true

@@ -1,0 +1,65 @@
+name: "🐛 Bug Report"
+description: "Report a bug to help us improve"
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of TurboPrivate AI are you running?
+      placeholder: e.g., 0.1.6
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python Version
+      placeholder: e.g., 3.12.0
+    validations:
+      required: true
+  - type: textarea
+    id: gpu
+    attributes:
+      label: GPU Info
+      description: Run `nvidia-smi` or `turbo doctor` and paste the output
+      render: shell
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Run `turbo deploy ...`
+        2. Run `turbo model serve ...`
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Paste any relevant logs or error messages
+      render: shell
